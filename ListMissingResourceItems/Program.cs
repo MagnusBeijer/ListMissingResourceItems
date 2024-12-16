@@ -1,122 +1,73 @@
-﻿using ClosedXML.Excel;
-using System.Collections.Frozen;
+﻿using System.Globalization;
 using System.Xml;
 
-class Program
+partial class Program
 {
-    private static readonly FrozenDictionary<string, string> m_CultureDictionary = new Dictionary<string, string>
-    {
-        { "en", "English" },
-        { "de", "German" },
-        { "es", "Spanish" },
-        { "fr", "French" },
-        { "it", "Italian" },
-        { "ko", "Korean" },
-        { "pt-BR", "Portuguese (Brazil)" },
-        { "zh-Hans", "Chinese (Simplified)" },
-        { "zh-Hant", "Chinese (Traditional)" }
-    }.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+    private const int FetchConcurrency = 10;
+    private static readonly GoogleTranslateLite translator = new GoogleTranslateLite();
+    private static readonly ExcelWriter excelWriter = new ExcelWriter();
 
     static async Task Main(string[] args)
     {
         var filePath = @"C:\R\iXDeveloper\Resources\ResourcesIde\Texts\TextsIde.resx";
-        var mainFile = await ReadResxFileAsync(filePath).TakeLast(10).ToDictionaryAsync(x => x.key, x => x.value);
+        var mainFile = await ReadResxFileAsync(filePath).TakeLast(11).ToDictionaryAsync(x => x.key, x => x.value);
 
         var fileName = Path.GetFileNameWithoutExtension(filePath);
         var searchPattern = fileName + ".*.resx";
         var path = Path.GetDirectoryName(filePath)!;
-        var result = new Dictionary<string, Dictionary<string, string?>>();
+        var result = new Dictionary<string, Dictionary<string, string>>();
+        var from = CultureInfo.GetCultureInfo("en");
+        var fetchBuffer = new Dictionary<string, Task<string>>();
+        var langFiles = Directory.EnumerateFiles(path, searchPattern).ToList();
+        var nrOfTexts = langFiles.Count * mainFile.Count;
+        var fetched = 0;
+        Console.WriteLine($"Fetching translations for {nrOfTexts} texts");
 
-        foreach (var file in Directory.EnumerateFiles(path, searchPattern))
+
+        foreach (var file in langFiles)
         {
             var lang = Path.GetFileNameWithoutExtension(file).Split('.')[1];
-            var localEntries = await ReadResxFileAsync(file).ToDictionaryAsync(x => x.key, x => x.value);
-            var localResult = new Dictionary<string, string?>();
+            var translationsExists = await ReadResxFileAsync(file).Where(x => !string.IsNullOrWhiteSpace(x.value)).Select(x => x.key).ToHashSetAsync();
+            var localResult = new Dictionary<string, string>();
+            var to = CultureInfo.GetCultureInfo(lang);
+
             foreach (var entry in mainFile)
             {
-                if (localEntries.TryGetValue(entry.Key, out var value))
+                if (!string.IsNullOrEmpty(entry.Value) && !translationsExists.Contains(entry.Key))
                 {
-                    localResult.Add(entry.Key, value);
-                }
-            }
-            result.Add(lang, localResult);
-        }
-
-        WriteToExcel(mainFile, result);
-    }
-
-
-    private static void WriteToExcel(Dictionary<string, string?> mainFile, Dictionary<string, Dictionary<string, string?>> result)
-    {
-        using var workbook = new XLWorkbook();
-        var worksheet = workbook.Worksheets.Add("Sheet1");
-
-
-        // Write the header
-        worksheet.Cell(1, 1).Value = "Key";
-        worksheet.Cell(1, 2).Value = m_CultureDictionary["En"];
-        int colIndex = 3;
-        foreach (var entry in result)
-        {
-            var lang = entry.Key;
-            if (m_CultureDictionary.TryGetValue(entry.Key, out var value))
-                lang = value;
-
-            worksheet.Cell(1, colIndex++).Value = lang;
-        }
-
-        // Apply styles to the header
-        var headerRange = worksheet.Range(1, 1, 1, colIndex - 1);
-        headerRange.Style.Font.Bold = true;
-        headerRange.Style.Fill.BackgroundColor = XLColor.LightGray;
-
-        // Write the data
-        int rowIndex = 2;
-        foreach (var entry in mainFile)
-        {
-            bool allLanguagesHasValues = result.All(langEntry => langEntry.Value.TryGetValue(entry.Key, out var value) && !string.IsNullOrWhiteSpace(value));
-
-            if (allLanguagesHasValues)
-                continue;
-
-            worksheet.Cell(rowIndex, 1).Value = entry.Key;
-            worksheet.Cell(rowIndex, 2).Value = entry.Value;
-            colIndex = 3;
-
-            foreach (var langEntry in result)
-            {
-                if (langEntry.Value.TryGetValue(entry.Key, out var value))
-                {
-                    worksheet.Cell(rowIndex, colIndex++).Value = value;
+                    var translationTask = translator.Translate(from, to, entry.Value, CancellationToken.None);
+                    fetchBuffer.Add(entry.Key, translationTask);
                 }
                 else
                 {
-                    worksheet.Cell(rowIndex, colIndex++).Value = "";
+                    fetched++;
+                }
+
+                if (fetchBuffer.Count == FetchConcurrency)
+                {
+                    await FillResultFromBuffer(fetchBuffer, localResult);
+                    fetched += FetchConcurrency;
+                    Console.WriteLine($"{fetched} Fetched");
                 }
             }
 
-            rowIndex++;
+            fetched += fetchBuffer.Count;
+            await FillResultFromBuffer(fetchBuffer, localResult);
+            Console.WriteLine($"{fetched} Fetched");
+
+            result.Add(lang, localResult);
         }
 
-        worksheet.Column(1).Hide();
-        worksheet.CellsUsed().Style.Alignment.WrapText = true;
-        worksheet.Columns().AdjustToContents();
+        excelWriter.Write(mainFile, result);
+    }
 
-        // Set max width
-        int maxWidth = 100;
-        foreach (var column in worksheet.ColumnsUsed())
+    private static async Task FillResultFromBuffer(Dictionary<string, Task<string>> fetchBuffer, Dictionary<string, string> localResult)
+    {
+        foreach (var item in fetchBuffer)
         {
-            if (column.Width > maxWidth)
-                column.Width = maxWidth;
+            localResult.Add(item.Key, await item.Value);
         }
-
-        worksheet.Rows().AdjustToContents();
-
-        // Freeze the headers and the first column
-        worksheet.SheetView.FreezeRows(1);
-        worksheet.SheetView.FreezeColumns(2);
-
-        workbook.SaveAs(@"c:\temp\out.xlsx");
+        fetchBuffer.Clear();
     }
 
     public static async IAsyncEnumerable<(string key, string? value)> ReadResxFileAsync(string filePath)
