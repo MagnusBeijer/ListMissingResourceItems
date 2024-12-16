@@ -4,7 +4,7 @@ using System.Xml;
 partial class Program
 {
     private const int FetchConcurrency = 10;
-    private static readonly GoogleTranslateLite translator = new GoogleTranslateLite();
+    private static readonly ITranslator translator = new GoogleTranslateLite();
     private static readonly ExcelWriter excelWriter = new ExcelWriter();
 
     static async Task Main(string[] args)

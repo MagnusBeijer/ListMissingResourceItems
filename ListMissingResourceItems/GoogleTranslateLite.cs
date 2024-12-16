@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 partial class Program
 {
-    public class GoogleTranslateLite
+    public class GoogleTranslateLite : ITranslator
     {
         private static readonly HashSet<string> zh = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "zh-hant", "zh-cht", "zh-hk", "zh-mo", "zh-tw" };
         private static readonly HttpClient httpClient = new HttpClient();
