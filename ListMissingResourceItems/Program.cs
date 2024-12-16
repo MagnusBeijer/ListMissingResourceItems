@@ -10,7 +10,8 @@ partial class Program
     static async Task Main(string[] args)
     {
         var filePath = @"C:\R\iXDeveloper\Resources\ResourcesIde\Texts\TextsIde.resx";
-        var mainFile = await ReadResxFileAsync(filePath).TakeLast(11).ToDictionaryAsync(x => x.key, x => x.value);
+        var nrOfItemsToRead = 11;
+        var mainFile = await ReadResxFileAsync(filePath).TakeLast(nrOfItemsToRead).ToDictionaryAsync(x => x.key, x => x.value);
 
         var fileName = Path.GetFileNameWithoutExtension(filePath);
         var searchPattern = fileName + ".*.resx";
