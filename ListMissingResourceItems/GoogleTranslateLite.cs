@@ -7,6 +7,9 @@ partial class Program
 {
     public class GoogleTranslateLite
     {
+        private static readonly HashSet<string> zh = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "zh-hant", "zh-cht", "zh-hk", "zh-mo", "zh-tw" };
+        private static readonly HttpClient httpClient = new HttpClient();
+
         public async Task<string> Translate(CultureInfo from, CultureInfo to, string value, CancellationToken cancellationToken)
         {
             List<string?> parameters = 
@@ -29,7 +32,7 @@ partial class Program
             var name = cultureInfo.Name;
 
             if (string.Equals(iso1, "zh", StringComparison.OrdinalIgnoreCase))
-                return new[] { "zh-hant", "zh-cht", "zh-hk", "zh-mo", "zh-tw" }.Contains(name, StringComparer.OrdinalIgnoreCase) ? "zh-TW" : "zh-CN";
+                return zh.Contains(name) ? "zh-TW" : "zh-CN";
 
             if (string.Equals(name, "haw-us", StringComparison.OrdinalIgnoreCase))
                 return "haw";
@@ -40,14 +43,12 @@ partial class Program
         private static async Task<string> GetHttpResponse(string baseUrl, ICollection<string?> parameters, CancellationToken cancellationToken)
         {
             var url = BuildUrl(baseUrl, parameters);
-
-            using var httpClient = new HttpClient();
-            var response = await httpClient.GetAsync(new Uri(url), cancellationToken).ConfigureAwait(false);
+            var response = await httpClient.GetAsync(new Uri(url), cancellationToken);
 
             response.EnsureSuccessStatusCode();
 
-            var result = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-            result = result.Substring(2, result.Length - 4);
+            var result = await response.Content.ReadAsStringAsync(cancellationToken);
+            result = result[2..^2];
             return Regex.Unescape(result);
         }
 
