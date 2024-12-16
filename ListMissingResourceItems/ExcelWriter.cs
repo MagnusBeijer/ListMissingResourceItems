@@ -1,38 +1,30 @@
 ﻿using ClosedXML.Excel;
 using System.Collections.Frozen;
+using System.Globalization;
 
 public class ExcelWriter
 {
-    private static readonly FrozenDictionary<string, string> cultureDictionary = new Dictionary<string, string>
-    {
-        { "en", "English" },
-        { "de", "German" },
-        { "es", "Spanish" },
-        { "fr", "French" },
-        { "it", "Italian" },
-        { "ko", "Korean" },
-        { "pt-BR", "Portuguese (Brazil)" },
-        { "zh-Hans", "Chinese (Simplified)" },
-        { "zh-Hant", "Chinese (Traditional)" }
-    }.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
-
-    public void Write(Dictionary<string, string?> mainFile, Dictionary<string, Dictionary<string, string>> result)
+    public void Write(Dictionary<string, string?> mainFile, Dictionary<CultureInfo, Dictionary<string, string>> result)
     {
         using var workbook = new XLWorkbook();
         var worksheet = workbook.Worksheets.Add("Sheet1");
 
+        var en = CultureInfo.GetCultureInfo("en");
 
         // Write the header
         worksheet.Cell(1, 1).Value = "Key";
-        worksheet.Cell(1, 2).Value = cultureDictionary["En"];
+        var cell = worksheet.Cell(1, 2);
+        cell.Value = en.NativeName;
+        var comment = cell.CreateComment();
+        comment.AddText(en.Name);
+
         int colIndex = 3;
         foreach (var entry in result)
         {
-            var lang = entry.Key;
-            if (cultureDictionary.TryGetValue(entry.Key, out var value))
-                lang = value;
-
-            worksheet.Cell(1, colIndex++).Value = lang;
+            cell = worksheet.Cell(1, colIndex++);
+            cell.Value = entry.Key.NativeName;
+            comment = cell.CreateComment();
+            comment.AddText(entry.Key.Name);
         }
 
         // Apply styles to the header

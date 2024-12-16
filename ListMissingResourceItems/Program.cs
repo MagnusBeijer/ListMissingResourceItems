@@ -16,7 +16,7 @@ partial class Program
         var fileName = Path.GetFileNameWithoutExtension(filePath);
         var searchPattern = fileName + ".*.resx";
         var path = Path.GetDirectoryName(filePath)!;
-        var result = new Dictionary<string, Dictionary<string, string>>();
+        var result = new Dictionary<CultureInfo, Dictionary<string, string>>();
         var from = CultureInfo.GetCultureInfo("en");
         var fetchBuffer = new Dictionary<string, Task<string>>(FetchConcurrency);
         var langFiles = Directory.EnumerateFiles(path, searchPattern).ToList();
@@ -56,7 +56,7 @@ partial class Program
             await FillResultFromBuffer(fetchBuffer, localResult);
             Console.WriteLine($"{fetched} Fetched");
 
-            result.Add(lang, localResult);
+            result.Add(to, localResult);
         }
 
         excelWriter.Write(mainFile, result);
