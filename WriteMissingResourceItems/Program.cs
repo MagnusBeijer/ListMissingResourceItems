@@ -34,7 +34,7 @@ public class Program
             if (data.TryGetValue(culture, out var translations))
             {
                 Console.WriteLine("Updating " + file);
-                await WriteResx(file, translations);
+                await WriteResxAsync(file, translations);
             }
         }
     }
@@ -72,7 +72,7 @@ public class Program
         return result;
     }
 
-    private static async Task WriteResx(string filePath, Dictionary<string, string> values)
+    private static async Task WriteResxAsync(string filePath, Dictionary<string, string> values)
     {
         XDocument doc = XDocument.Load(filePath);
         XElement? root = doc.Element("root");

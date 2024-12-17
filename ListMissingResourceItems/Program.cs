@@ -51,7 +51,7 @@ partial class Program
             {
                 if (!string.IsNullOrEmpty(entry.Value) && !translationsExists.Contains(entry.Key))
                 {
-                    var translationTask = _translator.Translate(from, to, entry.Value, CancellationToken.None);
+                    var translationTask = _translator.TranslateAsync(from, to, entry.Value, CancellationToken.None);
                     fetchBuffer.Add(entry.Key, translationTask);
                 }
                 else
@@ -61,14 +61,14 @@ partial class Program
 
                 if (fetchBuffer.Count == FetchConcurrency)
                 {
-                    await FillResultFromBuffer(fetchBuffer, localResult);
+                    await FillResultFromBufferAsync(fetchBuffer, localResult);
                     fetched += FetchConcurrency;
                     Console.WriteLine($"{fetched} Fetched");
                 }
             }
 
             fetched += fetchBuffer.Count;
-            await FillResultFromBuffer(fetchBuffer, localResult);
+            await FillResultFromBufferAsync(fetchBuffer, localResult);
             Console.WriteLine($"{fetched} Fetched");
 
             result.Add(to, localResult);
@@ -77,7 +77,7 @@ partial class Program
         _excelWriter.Write(mainFile, result, parameters.Value.ExcelFile);
     }
 
-    private static async Task FillResultFromBuffer(Dictionary<string, Task<string>> fetchBuffer, Dictionary<string, string> localResult)
+    private static async Task FillResultFromBufferAsync(Dictionary<string, Task<string>> fetchBuffer, Dictionary<string, string> localResult)
     {
         foreach (var item in fetchBuffer)
         {

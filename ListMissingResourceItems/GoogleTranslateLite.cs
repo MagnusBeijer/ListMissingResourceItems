@@ -12,7 +12,7 @@ partial class Program
         private static readonly HashSet<string> zh = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "zh-hant", "zh-cht", "zh-hk", "zh-mo", "zh-tw" };
         private static readonly HttpClient httpClient = new HttpClient();
 
-        public async Task<string> Translate(CultureInfo from, CultureInfo to, string value, CancellationToken cancellationToken)
+        public async Task<string> TranslateAsync(CultureInfo from, CultureInfo to, string value, CancellationToken cancellationToken)
         {
             List<string?> parameters = 
             [
@@ -22,7 +22,7 @@ partial class Program
                     "q", value
             ];
 
-            return await GetHttpResponse(
+            return await GetHttpResponseAsync(
                 "https://clients5.google.com/translate_a/t",
                 parameters,
                 cancellationToken);
@@ -42,7 +42,7 @@ partial class Program
             return iso1;
         }
 
-        private static async Task<string> GetHttpResponse(string baseUrl, ICollection<string?> parameters, CancellationToken cancellationToken)
+        private static async Task<string> GetHttpResponseAsync(string baseUrl, ICollection<string?> parameters, CancellationToken cancellationToken)
         {
             var url = BuildUrl(baseUrl, parameters);
             var response = await httpClient.GetAsync(new Uri(url), cancellationToken);
