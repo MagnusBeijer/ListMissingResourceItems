@@ -12,4 +12,7 @@ public class ApplicationParameters
 
     [Option("items-to-read", HelpText = "The nr. of items to read from the end of the resx file")]
     public int? NrOfItemsToRead { get; set; }
+
+    [Option("translator", HelpText = "Can be either GoogleMlTranslator or GoogleTranslateLite (default)")]
+    public string Translator { get; set; } = "GoogleTranslateLite";
 }

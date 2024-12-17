@@ -7,7 +7,6 @@ namespace ListMissingResourceItems;
 partial class Program
 {
     private const int FetchConcurrency = 10;
-    private static readonly ITranslator _translator = new GoogleTranslateLite();
     private static readonly ExcelWriter _excelWriter = new ExcelWriter();
 
     static async Task Main(string[] args)
@@ -37,6 +36,7 @@ partial class Program
         var langFiles = Directory.EnumerateFiles(path, searchPattern).ToList();
         var nrOfTexts = langFiles.Count * mainFile.Count;
         var fetched = 0;
+        var translator = TranslatorFactory(parameters.Value.Translator);
         Console.WriteLine($"Fetching translations for {nrOfTexts} texts");
 
 
@@ -51,7 +51,7 @@ partial class Program
             {
                 if (!string.IsNullOrEmpty(entry.Value) && !translationsExists.Contains(entry.Key))
                 {
-                    var translationTask = _translator.TranslateAsync(from, to, entry.Value, CancellationToken.None);
+                    var translationTask = translator.TranslateAsync(from, to, entry.Value, CancellationToken.None);
                     fetchBuffer.Add(entry.Key, translationTask);
                 }
                 else
@@ -75,6 +75,17 @@ partial class Program
         }
 
         _excelWriter.Write(mainFile, result, parameters.Value.ExcelFile);
+    }
+
+    public static ITranslator TranslatorFactory(string translator)
+    {
+        static string GetGoogleAuthKey() => File.ReadAllText("GoogleAuthKey.txt");
+
+        return translator switch
+        {
+            "GoogleMlTranslator" => new GoogleMlTranslator(GetGoogleAuthKey()),
+            _ or "GoogleTranslateLite" => new GoogleTranslateLite(),
+        };
     }
 
     private static async Task FillResultFromBufferAsync(Dictionary<string, Task<string>> fetchBuffer, Dictionary<string, string> localResult)
