@@ -116,15 +116,15 @@ partial class Program
             if (reader.NodeType == XmlNodeType.Element && reader.Name == "data")
             {
                 string? key = reader.GetAttribute("name");
-                string? value = null;
-
-                if (reader.ReadToDescendant("value"))
-                {
-                    value = await reader.ReadElementContentAsStringAsync();
-                }
-
+                
                 if (key != null)
                 {
+                    string? value = null;
+                    if (reader.ReadToDescendant("value"))
+                    {
+                        value = await reader.ReadElementContentAsStringAsync();
+                    }
+
                     yield return (key, value);
                 }
             }
