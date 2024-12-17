@@ -9,4 +9,7 @@ public class ApplicationParameters
 
     [Option("target-excel-file", Required = true)]
     public required string ExcelFile { get; set; }
+
+    [Option("items-to-read", HelpText = "The nr. of items to read from the end of the resx file")]
+    public int? NrOfItemsToRead { get; set; }
 }

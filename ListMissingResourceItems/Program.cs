@@ -1,5 +1,6 @@
 ﻿using CommandLine;
 using System.Globalization;
+using System.Linq;
 using System.Xml;
 
 namespace ListMissingResourceItems;
@@ -23,8 +24,10 @@ partial class Program
         }
 
         var resxFilePath = parameters.Value.ResxFile;
-        var nrOfItemsToRead = 11;
-        var mainFile = await ReadResxFileAsync(resxFilePath).TakeLast(nrOfItemsToRead).ToDictionaryAsync(x => x.key, x => x.value);
+        var nrOfItemsToRead = parameters.Value.NrOfItemsToRead;
+        var mainFile = nrOfItemsToRead == null ?
+            await ReadResxFileAsync(resxFilePath).ToDictionaryAsync(x => x.key, x => x.value) :
+            await ReadResxFileAsync(resxFilePath).TakeLast(nrOfItemsToRead.Value).ToDictionaryAsync(x => x.key, x => x.value);
 
         var fileName = Path.GetFileNameWithoutExtension(resxFilePath);
         var searchPattern = fileName + ".*.resx";
