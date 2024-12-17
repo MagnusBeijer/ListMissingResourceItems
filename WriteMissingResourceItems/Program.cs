@@ -74,7 +74,10 @@ public class Program
 
     private static async Task WriteResxAsync(string filePath, Dictionary<string, string> values)
     {
-        XDocument doc = XDocument.Load(filePath);
+        XDocument doc;
+        await using (var stream = File.OpenRead(filePath))
+            doc = await XDocument.LoadAsync(stream, System.Xml.Linq.LoadOptions.None, CancellationToken.None);
+
         XElement? root = doc.Element("root");
 
         if (root == null)
@@ -100,8 +103,8 @@ public class Program
             }
         }
 
-        await using var stream = File.OpenWrite(filePath);
-        await doc.SaveAsync(stream, System.Xml.Linq.SaveOptions.None, CancellationToken.None);
+        await using (var stream = File.OpenWrite(filePath))
+            await doc.SaveAsync(stream, System.Xml.Linq.SaveOptions.None, CancellationToken.None);
     }
 
 }

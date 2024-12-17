@@ -88,24 +88,22 @@ partial class Program
 
     public static async IAsyncEnumerable<(string key, string? value)> ReadResxFileAsync(string filePath)
     {
-        using (XmlReader reader = XmlReader.Create(filePath, new XmlReaderSettings { Async = true }))
+        using XmlReader reader = XmlReader.Create(filePath, new XmlReaderSettings { Async = true });
+        while (await reader.ReadAsync())
         {
-            while (await reader.ReadAsync())
+            if (reader.NodeType == XmlNodeType.Element && reader.Name == "data")
             {
-                if (reader.NodeType == XmlNodeType.Element && reader.Name == "data")
+                string? key = reader.GetAttribute("name");
+                string? value = null;
+
+                if (reader.ReadToDescendant("value"))
                 {
-                    string? key = reader.GetAttribute("name");
-                    string? value = null;
+                    value = await reader.ReadElementContentAsStringAsync();
+                }
 
-                    if (reader.ReadToDescendant("value"))
-                    {
-                        value = await reader.ReadElementContentAsStringAsync();
-                    }
-
-                    if (key != null)
-                    {
-                        yield return (key, value);
-                    }
+                if (key != null)
+                {
+                    yield return (key, value);
                 }
             }
         }
