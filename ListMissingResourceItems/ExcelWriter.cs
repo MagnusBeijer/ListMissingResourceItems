@@ -1,6 +1,8 @@
 ﻿using ClosedXML.Excel;
 using System.Globalization;
 
+namespace ListMissingResourceItems;
+
 public class ExcelWriter
 {
     public void Write(Dictionary<string, string?> mainFile, Dictionary<CultureInfo, Dictionary<string, string>> result, string excelFilePath)

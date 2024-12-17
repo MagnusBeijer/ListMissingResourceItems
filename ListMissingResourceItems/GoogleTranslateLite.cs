@@ -3,6 +3,8 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 
+namespace ListMissingResourceItems;
+
 partial class Program
 {
     public class GoogleTranslateLite : ITranslator

@@ -1,13 +1,14 @@
 ﻿using CommandLine;
-using ListMissingResourceItems;
 using System.Globalization;
 using System.Xml;
+
+namespace ListMissingResourceItems;
 
 partial class Program
 {
     private const int FetchConcurrency = 10;
-    private static readonly ITranslator translator = new GoogleTranslateLite();
-    private static readonly ExcelWriter excelWriter = new ExcelWriter();
+    private static readonly ITranslator _translator = new GoogleTranslateLite();
+    private static readonly ExcelWriter _excelWriter = new ExcelWriter();
 
     static async Task Main(string[] args)
     {
@@ -48,7 +49,7 @@ partial class Program
             {
                 if (!string.IsNullOrEmpty(entry.Value) && !translationsExists.Contains(entry.Key))
                 {
-                    var translationTask = translator.Translate(from, to, entry.Value, CancellationToken.None);
+                    var translationTask = _translator.Translate(from, to, entry.Value, CancellationToken.None);
                     fetchBuffer.Add(entry.Key, translationTask);
                 }
                 else
@@ -71,7 +72,7 @@ partial class Program
             result.Add(to, localResult);
         }
 
-        excelWriter.Write(mainFile, result, parameters.Value.ExcelFile);
+        _excelWriter.Write(mainFile, result, parameters.Value.ExcelFile);
     }
 
     private static async Task FillResultFromBuffer(Dictionary<string, Task<string>> fetchBuffer, Dictionary<string, string> localResult)

@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 
+namespace ListMissingResourceItems;
 partial class Program
 {
     public interface ITranslator
