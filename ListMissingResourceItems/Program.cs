@@ -24,20 +24,30 @@ partial class Program
 
         var resxFilePath = parameters.Value.ResxFile;
         var nrOfItemsToRead = parameters.Value.NrOfItemsToRead;
+        var translator = TranslatorFactory(parameters.Value.Translator);
+
         var mainFile = nrOfItemsToRead == null ?
             await ReadResxFileAsync(resxFilePath).ToDictionaryAsync(x => x.key, x => x.value) :
             await ReadResxFileAsync(resxFilePath).TakeLast(nrOfItemsToRead.Value).ToDictionaryAsync(x => x.key, x => x.value);
 
+        var result = await GetCultureStrings(resxFilePath, translator, mainFile);
+
+        _excelWriter.Write(mainFile, result, parameters.Value.ExcelFile);
+    }
+
+    private static async Task<Dictionary<CultureInfo, Dictionary<string, string>>> GetCultureStrings(string resxFilePath, ITranslator translator, Dictionary<string, string?> mainFile)
+    {
+        var result = new Dictionary<CultureInfo, Dictionary<string, string>>();
         var fileName = Path.GetFileNameWithoutExtension(resxFilePath);
         var searchPattern = fileName + ".*.resx";
         var path = Path.GetDirectoryName(resxFilePath)!;
-        var result = new Dictionary<CultureInfo, Dictionary<string, string>>();
+
         var from = CultureInfo.GetCultureInfo("en");
         var fetchBuffer = new Dictionary<string, Task<string>>(FetchConcurrency);
         var langFiles = Directory.EnumerateFiles(path, searchPattern).ToList();
         var nrOfTexts = langFiles.Count * mainFile.Count;
         var fetched = 0;
-        var translator = TranslatorFactory(parameters.Value.Translator);
+
         Console.WriteLine($"Fetching translations for {nrOfTexts} texts");
 
 
@@ -75,7 +85,7 @@ partial class Program
             result.Add(to, localResult);
         }
 
-        _excelWriter.Write(mainFile, result, parameters.Value.ExcelFile);
+        return result;
     }
 
     public static ITranslator TranslatorFactory(string translator)
