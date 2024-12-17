@@ -41,7 +41,7 @@ partial class Program
                 }
                 else
                 {
-                    fetched++;
+                    fetched++; // No need to do any translation
                 }
 
                 if (fetchBuffer.Count == FetchConcurrency)

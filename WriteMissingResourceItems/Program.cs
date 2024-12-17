@@ -50,6 +50,9 @@ namespace WriteMissingResourceItems
                     {
                         var key = row.Cell(1).GetValue<string>();
                         var translation = row.Cell(col).GetValue<string>();
+                        if (string.IsNullOrWhiteSpace(translation) || translation == "-")
+                            continue;
+
                         value![key] = translation;
                     }
                 }

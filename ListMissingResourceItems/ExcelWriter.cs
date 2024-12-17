@@ -41,13 +41,14 @@ public class ExcelWriter
 
             foreach (var langEntry in result)
             {
+                cell = worksheet.Cell(rowIndex, colIndex++);
                 if (langEntry.Value.TryGetValue(entry.Key, out var value))
                 {
-                    worksheet.Cell(rowIndex, colIndex++).Value = value;
+                    cell.Value = value;
                 }
                 else
                 {
-                    worksheet.Cell(rowIndex, colIndex++).Value = "-";
+                    cell.Value = "-";
                 }
             }
 
