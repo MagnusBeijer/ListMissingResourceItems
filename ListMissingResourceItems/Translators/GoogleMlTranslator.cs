@@ -3,7 +3,7 @@ using Google.Apis.Services;
 using Google.Apis.Translate.v2;
 using Google.Cloud.Translation.V2;
 
-namespace ListMissingResourceItems;
+namespace ListMissingResourceItems.Translators;
 
 internal class GoogleMlTranslator : ITranslator
 {

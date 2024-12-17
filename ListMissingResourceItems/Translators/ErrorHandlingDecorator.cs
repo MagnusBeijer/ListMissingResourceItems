@@ -1,7 +1,7 @@
 using System.Net;
 
-namespace ListMissingResourceItems;
-public static class ErrorHandlingDecorator
+namespace ListMissingResourceItems.Translators;
+internal static class ErrorHandlingDecorator
 {
     public static async Task<T> ExecuteWithHandling<T>(Func<Task<T>> action)
     {
