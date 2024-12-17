@@ -2,30 +2,26 @@ using System.Globalization;
 using Google.Apis.Services;
 using Google.Apis.Translate.v2;
 using Google.Cloud.Translation.V2;
-using static ListMissingResourceItems.Program;
 
 namespace ListMissingResourceItems;
+
 internal class GoogleMlTranslator : ITranslator
 {
-    private static string? _AuthKey;
+    private static string? _authKey;
     private static readonly HashSet<string> _zh = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "zh-hant", "zh-cht", "zh-hk", "zh-mo", "zh-tw" };
-    
-    public GoogleMlTranslator()
+    private readonly TranslationClientImpl _client;
+
+    public GoogleMlTranslator(string authKey)
     {
-        _AuthKey = "YOUR API KEY HERE";//TODO read from secret or else
+        _authKey = authKey;
+        var service = new TranslateService(new BaseClientService.Initializer { ApiKey = _authKey });
+        _client = new TranslationClientImpl(service, TranslationModel.ServiceDefault);
     }
 
     public async Task<string> TranslateAsync(CultureInfo from, CultureInfo to, string textToTranslate, CancellationToken cancellationToken)
     {
-        //from ignored english is default
-        return await ErrorHandlingDecorator.ExecuteWithHandling(async () =>
-            {
-                var service = new TranslateService(new BaseClientService.Initializer { ApiKey = _AuthKey });
-                var client = new TranslationClientImpl(service, TranslationModel.ServiceDefault);
-                var result = client.TranslateText(textToTranslate, GoogleLangCode(to));
-
-                return result.TranslatedText;
-            });
+        //parameter "from" is ignored since English is default
+        return (await ErrorHandlingDecorator.ExecuteWithHandling(() => _client.TranslateTextAsync(textToTranslate, GoogleLangCode(to)))).TranslatedText;
     }
 
     private static string GoogleLangCode(CultureInfo cultureInfo)

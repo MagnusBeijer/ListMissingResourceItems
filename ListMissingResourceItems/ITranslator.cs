@@ -1,10 +1,7 @@
 ﻿using System.Globalization;
 
 namespace ListMissingResourceItems;
-partial class Program
+public interface ITranslator
 {
-    public interface ITranslator
-    {
-        Task<string> TranslateAsync(CultureInfo from, CultureInfo to, string value, CancellationToken cancellationToken);
-    }
+    Task<string> TranslateAsync(CultureInfo from, CultureInfo to, string value, CancellationToken cancellationToken);
 }
