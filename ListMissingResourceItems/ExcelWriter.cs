@@ -1,5 +1,4 @@
 ﻿using ClosedXML.Excel;
-using System.Collections.Frozen;
 using System.Globalization;
 
 public class ExcelWriter
