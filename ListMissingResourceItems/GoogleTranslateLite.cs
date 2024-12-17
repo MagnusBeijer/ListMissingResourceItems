@@ -9,8 +9,8 @@ partial class Program
 {
     public class GoogleTranslateLite : ITranslator
     {
-        private static readonly HashSet<string> zh = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "zh-hant", "zh-cht", "zh-hk", "zh-mo", "zh-tw" };
-        private static readonly HttpClient httpClient = new HttpClient();
+        private static readonly HashSet<string> _zh = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "zh-hant", "zh-cht", "zh-hk", "zh-mo", "zh-tw" };
+        private static readonly HttpClient _httpClient = new HttpClient();
 
         public async Task<string> TranslateAsync(CultureInfo from, CultureInfo to, string value, CancellationToken cancellationToken)
         {
@@ -34,7 +34,7 @@ partial class Program
             var name = cultureInfo.Name;
 
             if (string.Equals(iso1, "zh", StringComparison.OrdinalIgnoreCase))
-                return zh.Contains(name) ? "zh-TW" : "zh-CN";
+                return _zh.Contains(name) ? "zh-TW" : "zh-CN";
 
             if (string.Equals(name, "haw-us", StringComparison.OrdinalIgnoreCase))
                 return "haw";
@@ -45,7 +45,7 @@ partial class Program
         private static async Task<string> GetHttpResponseAsync(string baseUrl, ICollection<string?> parameters, CancellationToken cancellationToken)
         {
             var url = BuildUrl(baseUrl, parameters);
-            var response = await httpClient.GetAsync(new Uri(url), cancellationToken);
+            var response = await _httpClient.GetAsync(new Uri(url), cancellationToken);
 
             response.EnsureSuccessStatusCode();
 
