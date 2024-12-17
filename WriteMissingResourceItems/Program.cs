@@ -1,4 +1,5 @@
 ﻿using ClosedXML.Excel;
+using CommandLine;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
@@ -7,15 +8,25 @@ namespace WriteMissingResourceItems
 {
     internal class Program
     {
-        public static async Task Main()
+        public static async Task Main(string[] args)
         {
-            string filePath = @"C:\R\iXDeveloper\Resources\ResourcesIde\Texts\TextsIde.resx";
-            var path = Path.GetDirectoryName(filePath)!;
-            var fileName = Path.GetFileNameWithoutExtension(filePath);
+            ParserResult<ApplicationParameters> parameters = Parser.Default.ParseArguments<ApplicationParameters>(args);
+
+            if (parameters.Tag == ParserResultType.NotParsed)
+            {
+                foreach (Error error in parameters.Errors)
+                {
+                    Console.WriteLine(error);
+                }
+            }
+
+            string resxFilePath = parameters.Value.ResxFile;
+            var path = Path.GetDirectoryName(resxFilePath)!;
+            var fileName = Path.GetFileNameWithoutExtension(resxFilePath);
             var searchPattern = fileName + ".*.resx";
             var langFiles = Directory.EnumerateFiles(path, searchPattern).ToList();
 
-            var data = ReadExcel(@"c:\temp\out.xlsx");
+            var data = ReadExcel(parameters.Value.ExcelFile);
             foreach (var file in langFiles)
             {
                 var lang = Path.GetFileNameWithoutExtension(file).Split('.')[1];

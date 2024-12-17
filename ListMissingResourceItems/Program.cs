@@ -1,4 +1,6 @@
-﻿using System.Globalization;
+﻿using CommandLine;
+using ListMissingResourceItems;
+using System.Globalization;
 using System.Xml;
 
 partial class Program
@@ -9,13 +11,23 @@ partial class Program
 
     static async Task Main(string[] args)
     {
-        var filePath = @"C:\R\iXDeveloper\Resources\ResourcesIde\Texts\TextsIde.resx";
-        var nrOfItemsToRead = 11;
-        var mainFile = await ReadResxFileAsync(filePath).TakeLast(nrOfItemsToRead).ToDictionaryAsync(x => x.key, x => x.value);
+        ParserResult<ApplicationParameters> parameters = Parser.Default.ParseArguments<ApplicationParameters>(args);
 
-        var fileName = Path.GetFileNameWithoutExtension(filePath);
+        if (parameters.Tag == ParserResultType.NotParsed)
+        {
+            foreach (Error error in parameters.Errors)
+            {
+                Console.WriteLine(error);
+            }
+        }
+
+        var resxFilePath = parameters.Value.ResxFile;
+        var nrOfItemsToRead = 11;
+        var mainFile = await ReadResxFileAsync(resxFilePath).TakeLast(nrOfItemsToRead).ToDictionaryAsync(x => x.key, x => x.value);
+
+        var fileName = Path.GetFileNameWithoutExtension(resxFilePath);
         var searchPattern = fileName + ".*.resx";
-        var path = Path.GetDirectoryName(filePath)!;
+        var path = Path.GetDirectoryName(resxFilePath)!;
         var result = new Dictionary<CultureInfo, Dictionary<string, string>>();
         var from = CultureInfo.GetCultureInfo("en");
         var fetchBuffer = new Dictionary<string, Task<string>>(FetchConcurrency);
@@ -59,7 +71,7 @@ partial class Program
             result.Add(to, localResult);
         }
 
-        excelWriter.Write(mainFile, result);
+        excelWriter.Write(mainFile, result, parameters.Value.ExcelFile);
     }
 
     private static async Task FillResultFromBuffer(Dictionary<string, Task<string>> fetchBuffer, Dictionary<string, string> localResult)
