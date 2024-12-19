@@ -1,4 +1,4 @@
-﻿using CommandLine;
+using CommandLine;
 using ListMissingResourceItems.Translators;
 using System.Globalization;
 using System.Xml;
@@ -26,9 +26,10 @@ partial class Program
         var nrOfItemsToRead = parameters.Value.NrOfItemsToRead;
         var translator = TranslatorFactory(parameters.Value.Translator);
 
-        var mainFile = nrOfItemsToRead == null ?
-            await ReadResxFileAsync(resxFilePath).ToDictionaryAsync(x => x.key, x => x.value) :
-            await ReadResxFileAsync(resxFilePath).TakeLast(nrOfItemsToRead.Value).ToDictionaryAsync(x => x.key, x => x.value);
+        var mainFile = await (nrOfItemsToRead == null ?
+                            ReadResxFileAsync(resxFilePath) :
+                            ReadResxFileAsync(resxFilePath).TakeLast(nrOfItemsToRead.Value)
+                        ).ToDictionaryAsync(x => x.key, x => x.value);
 
         var result = await GetCultureStrings(resxFilePath, translator, mainFile);
 
