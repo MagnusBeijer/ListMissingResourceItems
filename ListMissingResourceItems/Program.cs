@@ -24,12 +24,18 @@ partial class Program
 
         var resxFilePath = parameters.Value.ResxFile;
         var nrOfItemsToRead = parameters.Value.NrOfItemsToRead;
+        var takeFromKey = parameters.Value.TakeFromKey;
         var translator = TranslatorFactory(parameters.Value.Translator);
 
-        var mainFile = await (nrOfItemsToRead == null ?
-                            ReadResxFileAsync(resxFilePath) :
-                            ReadResxFileAsync(resxFilePath).TakeLast(nrOfItemsToRead.Value)
-                        ).ToDictionaryAsync(x => x.key, x => x.value);
+        var resx = ReadResxFileAsync(resxFilePath);
+
+        if (takeFromKey != null)
+            resx = resx.SkipWhile(x => x.key != takeFromKey);
+
+        if (nrOfItemsToRead != null)
+            resx = resx.TakeLast(nrOfItemsToRead.Value);
+
+        var mainFile = await resx.ToDictionaryAsync(x => x.key, x => x.value);
 
         var result = await GetCultureStrings(resxFilePath, translator, mainFile);
         RemoveRowsWhereNoTranslationIsNeeded(result, mainFile);
