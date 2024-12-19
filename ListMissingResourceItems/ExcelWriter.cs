@@ -1,4 +1,4 @@
-﻿using ClosedXML.Excel;
+using ClosedXML.Excel;
 using System.Globalization;
 
 namespace ListMissingResourceItems;
@@ -58,18 +58,17 @@ public class ExcelWriter
         }
 
         worksheet.Column(1).Hide();
-        worksheet.CellsUsed().Style.Alignment.WrapText = true;
         worksheet.Columns().AdjustToContents();
+        worksheet.CellsUsed().Style.Alignment.WrapText = true;
+        worksheet.CellsUsed().Style.Alignment.Vertical = XLAlignmentVerticalValues.Top;
 
         // Set max width
-        int maxWidth = 100;
+        int maxWidth = 70;
         foreach (var column in worksheet.ColumnsUsed())
         {
             if (column.Width > maxWidth)
                 column.Width = maxWidth;
         }
-
-        worksheet.Rows().AdjustToContents();
 
         // Freeze the headers and the first column
         worksheet.SheetView.FreezeRows(1);
