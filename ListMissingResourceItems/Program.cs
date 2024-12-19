@@ -32,6 +32,7 @@ partial class Program
                         ).ToDictionaryAsync(x => x.key, x => x.value);
 
         var result = await GetCultureStrings(resxFilePath, translator, mainFile);
+        RemoveRowsWhereNoTranslationIsNeeded(result, mainFile);
 
         _excelWriter.Write(mainFile, result, parameters.Value.ExcelFile);
     }
@@ -88,6 +89,19 @@ partial class Program
 
         return result;
     }
+
+    private static void RemoveRowsWhereNoTranslationIsNeeded(Dictionary<CultureInfo, Dictionary<string, string>> result, Dictionary<string, string?> mainFile)
+    {
+        var keysToRemove = mainFile.Keys
+            .Where(key => result.All(langEntry => !langEntry.Value.ContainsKey(key)))
+            .ToList();
+
+        foreach (var key in keysToRemove)
+        {
+            mainFile.Remove(key);
+        }
+    }
+
 
     public static ITranslator TranslatorFactory(string translator)
     {
