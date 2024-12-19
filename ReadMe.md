@@ -5,6 +5,7 @@ Fetches all untranslated string from related resx files, calls the google lite t
 `target-excel-file` path to the Excel file to save the result to.  
 `take-from-key` is optional and indicates which key to start reading from. All items before this key will be skipped.  
 `items-to-read` is optional and indicates the nr. of items to read from the end. ("take-from-key" is evaluated before this one.)  
+`translator` is optional and indicates which translator to use for translations. Can be either "GoogleTranslateLite" (default and free) or GoogleMlTranslator (requires an api key put in a "GoogleAuthKey.txt")  
 
 Example:  
 `--source-resx-file C:\\MyApp\\Resources\\TextsIde.resx --target-excel-file C:\\temp\\out.xlsx --items-to-read 11`
