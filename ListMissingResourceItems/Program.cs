@@ -29,7 +29,7 @@ partial class Program
         var translator = TranslatorFactory(parameters.Value.Translator);
         var resxFilePath = Path.Combine(repoPath, relativeResxFilePath.Replace('/', '\\').TrimStart('\\'));
 
-        var mainFile = await CompareFiles(relativeResxFilePath, repoPath, remoteBranch, resxFilePath)
+        var mainFile = await GetDiffOfResxBetweenBranches(relativeResxFilePath, repoPath, remoteBranch, resxFilePath)
                                 .Where(x => !string.IsNullOrWhiteSpace(x.value))
                                 .ToDictionaryAsync(x => x.key, x => x.value!);
 
@@ -48,7 +48,7 @@ partial class Program
         process.Start();
     }
 
-    private static async IAsyncEnumerable<(string key, string? value)> CompareFiles(string relativeResxFilePath, string repoPath, string remoteBranch, string resxFilePath)
+    private static async IAsyncEnumerable<(string key, string? value)> GetDiffOfResxBetweenBranches(string relativeResxFilePath, string repoPath, string remoteBranch, string resxFilePath)
     {
         var gitCommand = $"show {remoteBranch}:" + relativeResxFilePath.Replace('\\', '/').TrimStart('/');
 
@@ -151,25 +151,27 @@ partial class Program
 
     public static async IAsyncEnumerable<(string key, string? value)> ReadResxFileAsync(TextReader textReader)
     {
-        using XmlReader reader = XmlReader.Create(textReader, new XmlReaderSettings { Async = true, });
-        while (await reader.ReadAsync())
+        using (textReader)
+        using (var reader = XmlReader.Create(textReader, new XmlReaderSettings { Async = true, }))
         {
-            if (reader.NodeType == XmlNodeType.Element && reader.Name == "data")
+            while (await reader.ReadAsync())
             {
-                string? key = reader.GetAttribute("name");
-
-                if (key != null)
+                if (reader.NodeType == XmlNodeType.Element && reader.Name == "data")
                 {
-                    string? value = null;
-                    if (reader.ReadToDescendant("value"))
-                    {
-                        value = await reader.ReadElementContentAsStringAsync();
-                    }
+                    string? key = reader.GetAttribute("name");
 
-                    yield return (key, value);
+                    if (key != null)
+                    {
+                        string? value = null;
+                        if (reader.ReadToDescendant("value"))
+                        {
+                            value = await reader.ReadElementContentAsStringAsync();
+                        }
+
+                        yield return (key, value);
+                    }
                 }
             }
         }
-        textReader.Dispose();
     }
 }
