@@ -7,7 +7,7 @@ public class ApplicationParameters
     [Option("target-excel-file", Required = true)]
     public required string ExcelFile { get; set; }
 
-    [Option("relative-resx-filePath", Required = true)]
+    [Option("relative-resx-file", Required = true)]
     public required string RelativeResxFilePath { get; set; }
 
     [Option("repository-path", Required = true)]
