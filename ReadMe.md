@@ -16,4 +16,4 @@ Imports the Excel file created by ListMissingResourceItems back to the resx file
 `target-excel-file` path to the main resx file to save the result to.  
 
 Example:  
-`--target-resx-file C:\R\MyRepo\Resources\TextsIde.resx --source-excel-file C:\temp\out.xlsx`
+`WriteMissingResourceItems.exe --target-resx-file C:\R\MyRepo\Resources\TextsIde.resx --source-excel-file C:\temp\out.xlsx`
