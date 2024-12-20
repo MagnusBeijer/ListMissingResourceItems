@@ -1,5 +1,5 @@
 # ListMissingResourceItems
-Compares the keys/values is a resx file with the same resx file in a remote branch and translates all new/changed values and saves the result in an Excel file for review.
+Compares the keys/values in a resx file with the same resx file in a remote branch and translates all new/changed values and saves the result to an Excel file for review.
 
 `repository-path` path to repository to use.
 `relative-resx-filePath` relative path (from the repository) to the main resx file to use as source.
