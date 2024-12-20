@@ -1,7 +1,8 @@
-using CommandLine;
-using ListMissingResourceItems.Translators;
+using System.Diagnostics;
 using System.Globalization;
 using System.Xml;
+using CommandLine;
+using ListMissingResourceItems.Translators;
 
 namespace ListMissingResourceItems;
 
@@ -22,28 +23,58 @@ partial class Program
             }
         }
 
-        var resxFilePath = parameters.Value.ResxFile;
-        var nrOfItemsToRead = parameters.Value.NrOfItemsToRead;
-        var takeFromKey = parameters.Value.TakeFromKey;
+        var relativeResxFilePath = parameters.Value.RelativeResxFilePath;
+        var repoPath = parameters.Value.RepoPath;
+        var remoteBranch = parameters.Value.RemoteBranch;
         var translator = TranslatorFactory(parameters.Value.Translator);
+        var resxFilePath = Path.Combine(repoPath, relativeResxFilePath.Replace('/', '\\').TrimStart('\\'));
 
-        var resx = ReadResxFileAsync(resxFilePath);
-
-        if (takeFromKey != null)
-            resx = resx.SkipWhile(x => x.key != takeFromKey);
-
-        if (nrOfItemsToRead != null)
-            resx = resx.TakeLast(nrOfItemsToRead.Value);
-
-        var mainFile = await resx.ToDictionaryAsync(x => x.key, x => x.value);
+        var mainFile = await CompareFiles(relativeResxFilePath, repoPath, remoteBranch, resxFilePath)
+                                .Where(x => !string.IsNullOrWhiteSpace(x.value))
+                                .ToDictionaryAsync(x => x.key, x => x.value!);
 
         var result = await GetCultureStrings(resxFilePath, translator, mainFile);
-        RemoveRowsWhereNoTranslationIsNeeded(result, mainFile);
 
         _excelWriter.Write(mainFile, result, parameters.Value.ExcelFile);
+        OpenExcelFile(parameters);
     }
 
-    private static async Task<Dictionary<CultureInfo, Dictionary<string, string>>> GetCultureStrings(string resxFilePath, ITranslator translator, Dictionary<string, string?> mainFile)
+    private static void OpenExcelFile(ParserResult<ApplicationParameters> parameters)
+    {
+        using var process = new Process();
+        process.StartInfo.FileName = parameters.Value.ExcelFile;
+        process.StartInfo.UseShellExecute = true;
+
+        process.Start();
+    }
+
+    private static async IAsyncEnumerable<(string key, string? value)> CompareFiles(string relativeResxFilePath, string repoPath, string remoteBranch, string resxFilePath)
+    {
+        var gitCommand = $"show {remoteBranch}:" + relativeResxFilePath.Replace('\\', '/').TrimStart('/');
+
+        using var process = new Process();
+
+        process.StartInfo.FileName = "git";
+        process.StartInfo.Arguments = gitCommand;
+        process.StartInfo.WorkingDirectory = repoPath;
+        process.StartInfo.RedirectStandardOutput = true;
+        process.StartInfo.UseShellExecute = false;
+        process.StartInfo.CreateNoWindow = true;
+
+        process.Start();
+
+        var remoterBranchFile = await ReadResxFileAsync(process.StandardOutput).ToDictionaryAsync(x => x.key, x => x.value);
+        var myBranchFile = ReadResxFileAsync(resxFilePath);
+
+        await foreach (var (key, value) in myBranchFile)
+        {
+            if (!remoterBranchFile.TryGetValue(key, out var otherValue) || otherValue != value)
+                yield return (key, value);
+        }
+        process.WaitForExit();
+    }
+
+    private static async Task<Dictionary<CultureInfo, Dictionary<string, string>>> GetCultureStrings(string resxFilePath, ITranslator translator, Dictionary<string, string> mainFile)
     {
         var result = new Dictionary<CultureInfo, Dictionary<string, string>>();
         var fileName = Path.GetFileNameWithoutExtension(resxFilePath);
@@ -62,21 +93,13 @@ partial class Program
         foreach (var file in langFiles)
         {
             var lang = Path.GetFileNameWithoutExtension(file).Split('.')[1];
-            var translationsExists = await ReadResxFileAsync(file).Where(x => !string.IsNullOrWhiteSpace(x.value)).Select(x => x.key).ToHashSetAsync();
             var localResult = new Dictionary<string, string>();
             var to = CultureInfo.GetCultureInfo(lang);
 
             foreach (var entry in mainFile)
             {
-                if (!string.IsNullOrEmpty(entry.Value) && !translationsExists.Contains(entry.Key))
-                {
-                    var translationTask = translator.TranslateAsync(from, to, entry.Value, CancellationToken.None);
-                    fetchBuffer.Add(entry.Key, translationTask);
-                }
-                else
-                {
-                    fetched++; // No need to do any translation
-                }
+                var translationTask = translator.TranslateAsync(from, to, entry.Value!, CancellationToken.None);
+                fetchBuffer.Add(entry.Key, translationTask);
 
                 if (fetchBuffer.Count == FetchConcurrency)
                 {
@@ -86,28 +109,19 @@ partial class Program
                 }
             }
 
-            fetched += fetchBuffer.Count;
-            await FillResultFromBufferAsync(fetchBuffer, localResult);
-            Console.WriteLine($"{fetched} Fetched");
+            if (fetchBuffer.Count > 0)
+            {
+                fetched += fetchBuffer.Count;
+                await FillResultFromBufferAsync(fetchBuffer, localResult);
+                Console.WriteLine($"{fetched} Fetched");
+
+            }
 
             result.Add(to, localResult);
         }
 
         return result;
     }
-
-    private static void RemoveRowsWhereNoTranslationIsNeeded(Dictionary<CultureInfo, Dictionary<string, string>> result, Dictionary<string, string?> mainFile)
-    {
-        var keysToRemove = mainFile.Keys
-            .Where(key => result.All(langEntry => !langEntry.Value.ContainsKey(key)))
-            .ToList();
-
-        foreach (var key in keysToRemove)
-        {
-            mainFile.Remove(key);
-        }
-    }
-
 
     public static ITranslator TranslatorFactory(string translator)
     {
@@ -129,15 +143,21 @@ partial class Program
         fetchBuffer.Clear();
     }
 
-    public static async IAsyncEnumerable<(string key, string? value)> ReadResxFileAsync(string filePath)
+    public static IAsyncEnumerable<(string key, string? value)> ReadResxFileAsync(string filePath)
     {
-        using XmlReader reader = XmlReader.Create(filePath, new XmlReaderSettings { Async = true });
+        var textReader = File.OpenText(filePath);
+        return ReadResxFileAsync(textReader);
+    }
+
+    public static async IAsyncEnumerable<(string key, string? value)> ReadResxFileAsync(TextReader textReader)
+    {
+        using XmlReader reader = XmlReader.Create(textReader, new XmlReaderSettings { Async = true, });
         while (await reader.ReadAsync())
         {
             if (reader.NodeType == XmlNodeType.Element && reader.Name == "data")
             {
                 string? key = reader.GetAttribute("name");
-                
+
                 if (key != null)
                 {
                     string? value = null;
@@ -150,5 +170,6 @@ partial class Program
                 }
             }
         }
+        textReader.Dispose();
     }
 }

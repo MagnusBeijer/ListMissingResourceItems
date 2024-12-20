@@ -1,14 +1,13 @@
 # ListMissingResourceItems
-Fetches all untranslated string from related resx files, calls the google lite translation api and then puts the result in an Excel file.  
+Compares the keys/values is a resx file with the same resx file in a remote branch and translates all new/changed values and saves the result in an Excel file for review.
 
-`source-resx-file` path to the main resx file to use as source.  
-`target-excel-file` path to the Excel file to save the result to.  
-`take-from-key` is optional and indicates which key to start reading from. All items before this key will be skipped.  
-`items-to-read` is optional and indicates the nr. of items to read from the end. ("take-from-key" is evaluated before this one.)  
-`translator` is optional and indicates which translator to use for translations. Can be either "GoogleTranslateLite" (default and free) or GoogleMlTranslator (requires an api key put in a "GoogleAuthKey.txt")  
+`repository-path` path to repository to use.
+`relative-resx-filePath` relative path (from the repository) to the main resx file to use as source.
+`remote-branch-name` name of the remote branch to compare the resx file with.
+`target-excel-file` path to the Excel file to save the result to.
 
 Example:  
-`--source-resx-file C:\MyApp\Resources\TextsIde.resx --target-excel-file C:\temp\out.xlsx --items-to-read 11`
+`ListMissingResourceItems.exe --repository-path C:\R\MyRepo --relative-resx-filePath Resources\TextsIde.resx --remote-branch-name master --target-excel-file C:\temp\out.xlsx`
 
 # WriteMissingResourceItems
 Imports the Excel file created by ListMissingResourceItems back to the resx files.  
@@ -17,4 +16,4 @@ Imports the Excel file created by ListMissingResourceItems back to the resx file
 `target-excel-file` path to the main resx file to save the result to.  
 
 Example:  
-`--target-resx-file C:\MyApp\Resources\TextsIde.resx --source-excel-file C:\temp\out.xlsx`
+`--target-resx-file C:\R\MyRepo\Resources\TextsIde.resx --source-excel-file C:\temp\out.xlsx`
