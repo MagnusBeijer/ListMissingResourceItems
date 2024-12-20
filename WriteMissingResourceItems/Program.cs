@@ -1,4 +1,4 @@
-﻿using ClosedXML.Excel;
+using ClosedXML.Excel;
 using CommandLine;
 using System.Globalization;
 using System.Runtime.InteropServices;
@@ -43,30 +43,38 @@ public class Program
     {
         var result = new Dictionary<CultureInfo, Dictionary<string, string>>();
 
-        using (var workbook = new XLWorkbook(filePath))
+        try
         {
-            var worksheet = workbook.Worksheet(1);
-            var headerRow = worksheet.Row(1);
 
-            for (int col = 2; col <= headerRow.LastCellUsed().Address.ColumnNumber; col++)
+            using (var workbook = new XLWorkbook(filePath))
             {
-                var cultureName = headerRow.Cell(col).GetComment().Text;
-                var culture = CultureInfo.GetCultureInfo(cultureName);
+                var worksheet = workbook.Worksheet(1);
+                var headerRow = worksheet.Row(1);
 
-                ref var value = ref CollectionsMarshal.GetValueRefOrAddDefault(result, culture, out bool exists);
-                if (!exists)
-                    value = [];
-
-                foreach (var row in worksheet.RowsUsed().Skip(1))
+                for (int col = 2; col <= headerRow.LastCellUsed().Address.ColumnNumber; col++)
                 {
-                    var key = row.Cell(1).GetValue<string>();
-                    var translation = row.Cell(col).GetValue<string>();
-                    if (string.IsNullOrWhiteSpace(translation) || translation == "-")
-                        continue;
+                    var cultureName = headerRow.Cell(col).GetComment().Text;
+                    var culture = CultureInfo.GetCultureInfo(cultureName);
 
-                    value![key] = translation;
+                    ref var value = ref CollectionsMarshal.GetValueRefOrAddDefault(result, culture, out bool exists);
+                    if (!exists)
+                        value = [];
+
+                    foreach (var row in worksheet.RowsUsed().Skip(1))
+                    {
+                        var key = row.Cell(1).GetValue<string>();
+                        var translation = row.Cell(col).GetValue<string>();
+                        if (string.IsNullOrWhiteSpace(translation) || translation == "-")
+                            continue;
+
+                        value![key] = translation;
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Could not open excel-file: {filePath}, reason: {ex.Message}");
         }
 
         return result;
