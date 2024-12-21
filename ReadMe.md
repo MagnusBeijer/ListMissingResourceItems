@@ -4,7 +4,7 @@ Compares the keys/values in a resx file with the same resx file in a remote bran
 `repository-path` path to repository to use.  
 `relative-resx-file` relative path (from the repository) to the main resx file to use as source.  
 `remote-branch-name` name of the remote branch to compare the resx file with.  
-`target-excel-file` path to the Excel file to save the result to.
+`target-excel-file` path to the Excel file to save the result to.  
 `translator` is optional and indicates which translator to use for translations. Can be either "GoogleTranslateLite" (default and free) or GoogleMlTranslator (requires an api key put in a "GoogleAuthKey.txt")  
 
 Example:  
