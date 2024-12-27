@@ -24,7 +24,7 @@ partial class Program
         }
 
         var sourceResxFile = parameters.Value.SourceResxFile;
-        var repoPath = GetRepoPath(sourceResxFile);
+        var repoPath = await GetRepoPath(sourceResxFile);
         var remoteBranch = parameters.Value.RemoteBranch;
         var translator = TranslatorFactory(parameters.Value.Translator);
         var relativeResxFilePath = sourceResxFile[(repoPath.Length + 1)..];
@@ -48,7 +48,7 @@ partial class Program
         process.Start();
     }
 
-    private static string GetRepoPath(string resxFilePath)
+    private static async Task<string> GetRepoPath(string resxFilePath)
     {
         using var process = new Process();
 
@@ -60,8 +60,8 @@ partial class Program
         process.StartInfo.CreateNoWindow = true;
 
         process.Start();
-        var path = process.StandardOutput.ReadToEnd().Trim().Replace('/', '\\');
-        process.WaitForExit();
+        var path = (await process.StandardOutput.ReadToEndAsync()).Trim().Replace('/', '\\');
+        await process.WaitForExitAsync();
 
         return path;
     }
@@ -89,7 +89,7 @@ partial class Program
             if (!remoterBranchFile.TryGetValue(key, out var otherValue) || otherValue != value)
                 yield return (key, value);
         }
-        process.WaitForExit();
+        await process.WaitForExitAsync();
     }
 
     private static async Task<Dictionary<CultureInfo, Dictionary<string, string>>> GetCultureStrings(string resxFilePath, ITranslator translator, Dictionary<string, string> mainFile)
