@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Globalization;
-using System.Xml;
 using CommandLine;
 using ListMissingResourceItems.Translators;
 
@@ -10,6 +9,7 @@ partial class Program
 {
     private const int FetchConcurrency = 10;
     private static readonly ExcelWriter _excelWriter = new ExcelWriter();
+    private static readonly ResxReader _resxReader = new ResxReader();
 
     static async Task Main(string[] args)
     {
@@ -23,17 +23,17 @@ partial class Program
             }
         }
 
-        var relativeResxFilePath = parameters.Value.RelativeResxFilePath;
-        var repoPath = parameters.Value.RepoPath;
+        var sourceResxFile = parameters.Value.SourceResxFile;
+        var repoPath = GetRepoPath(sourceResxFile);
         var remoteBranch = parameters.Value.RemoteBranch;
         var translator = TranslatorFactory(parameters.Value.Translator);
-        var resxFilePath = Path.Combine(repoPath, relativeResxFilePath.Replace('/', '\\').TrimStart('\\'));
+        var relativeResxFilePath = sourceResxFile[(repoPath.Length + 1)..];
 
-        var mainFile = await GetDiffOfResxBetweenBranches(relativeResxFilePath, repoPath, remoteBranch, resxFilePath)
+        var mainFile = await GetDiffOfResxBetweenBranches(relativeResxFilePath, repoPath, remoteBranch, sourceResxFile)
                                 .Where(x => !string.IsNullOrWhiteSpace(x.value))
                                 .ToDictionaryAsync(x => x.key, x => x.value!);
 
-        var result = await GetCultureStrings(resxFilePath, translator, mainFile);
+        var result = await GetCultureStrings(sourceResxFile, translator, mainFile);
 
         _excelWriter.Write(mainFile, result, parameters.Value.ExcelFile);
         OpenExcelFile(parameters);
@@ -46,6 +46,24 @@ partial class Program
         process.StartInfo.UseShellExecute = true;
 
         process.Start();
+    }
+
+    private static string GetRepoPath(string resxFilePath)
+    {
+        using var process = new Process();
+
+        process.StartInfo.FileName = "git";
+        process.StartInfo.Arguments = "rev-parse --show-toplevel";
+        process.StartInfo.WorkingDirectory = Path.GetDirectoryName(resxFilePath);
+        process.StartInfo.RedirectStandardOutput = true;
+        process.StartInfo.UseShellExecute = false;
+        process.StartInfo.CreateNoWindow = true;
+
+        process.Start();
+        var path = process.StandardOutput.ReadToEnd().Trim().Replace('/', '\\');
+        process.WaitForExit();
+
+        return path;
     }
 
     private static async IAsyncEnumerable<(string key, string? value)> GetDiffOfResxBetweenBranches(string relativeResxFilePath, string repoPath, string remoteBranch, string resxFilePath)
@@ -63,8 +81,8 @@ partial class Program
 
         process.Start();
 
-        var remoterBranchFile = await ReadResxFileAsync(process.StandardOutput).ToDictionaryAsync(x => x.key, x => x.value);
-        var myBranchFile = ReadResxFileAsync(resxFilePath);
+        var remoterBranchFile = await _resxReader.ReadResxFileAsync(process.StandardOutput).ToDictionaryAsync(x => x.key, x => x.value);
+        var myBranchFile = _resxReader.ReadResxFileAsync(resxFilePath);
 
         await foreach (var (key, value) in myBranchFile)
         {
@@ -141,37 +159,5 @@ partial class Program
             localResult.Add(item.Key, await item.Value);
         }
         fetchBuffer.Clear();
-    }
-
-    public static IAsyncEnumerable<(string key, string? value)> ReadResxFileAsync(string filePath)
-    {
-        var textReader = File.OpenText(filePath);
-        return ReadResxFileAsync(textReader);
-    }
-
-    public static async IAsyncEnumerable<(string key, string? value)> ReadResxFileAsync(TextReader textReader)
-    {
-        using (textReader)
-        using (var reader = XmlReader.Create(textReader, new XmlReaderSettings { Async = true, }))
-        {
-            while (await reader.ReadAsync())
-            {
-                if (reader.NodeType == XmlNodeType.Element && reader.Name == "data")
-                {
-                    string? key = reader.GetAttribute("name");
-
-                    if (key != null)
-                    {
-                        string? value = null;
-                        if (reader.ReadToDescendant("value"))
-                        {
-                            value = await reader.ReadElementContentAsStringAsync();
-                        }
-
-                        yield return (key, value);
-                    }
-                }
-            }
-        }
     }
 }
