@@ -21,6 +21,7 @@ partial class Program
             {
                 Console.WriteLine(error);
             }
+            return;
         }
 
         var sourceResxFile = parameters.Value.SourceResxFile;

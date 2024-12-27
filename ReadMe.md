@@ -7,7 +7,7 @@ Compares the keys/values in a resx file with the same resx file in a remote bran
 `translator` is optional and indicates which translator to use for translations. Can be either "GoogleTranslateLite" (default and free) or GoogleMlTranslator (requires an api key put in a "GoogleAuthKey.txt")  
 
 Example:  
-`ListMissingResourceItems.exe --repository-path C:\R\MyRepo --relative-resx-file Resources\TextsIde.resx --remote-branch-name master --target-excel-file C:\temp\out.xlsx`
+`ListMissingResourceItems.exe --source-resx-file C:\R\MyRepo\Resources\TextsIde.resx --remote-branch-name master --target-excel-file C:\temp\out.xlsx`
 
 # WriteMissingResourceItems
 Imports the Excel file created by ListMissingResourceItems back to the resx files.  
