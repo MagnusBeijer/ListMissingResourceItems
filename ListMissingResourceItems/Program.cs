@@ -31,16 +31,16 @@ partial class Program
         }
 
         var sourceResxFile = parameters.Value.SourceResxFile;
-        var repoPath = await GetRepoPath(sourceResxFile);
+        var repoPath = await GetRepoPathAsync(sourceResxFile);
         var remoteBranch = parameters.Value.RemoteBranch;
         var translator = TranslatorFactory(parameters.Value.Translator);
         var relativeResxFilePath = sourceResxFile[(repoPath.Length + 1)..];
 
-        var mainFile = await GetDiffOfResxBetweenBranches(relativeResxFilePath, repoPath, remoteBranch, sourceResxFile)
+        var mainFile = await GetDiffOfResxBetweenBranchesAsync(relativeResxFilePath, repoPath, remoteBranch, sourceResxFile)
                                 .Where(x => !string.IsNullOrWhiteSpace(x.value))
                                 .ToDictionaryAsync(x => x.key, x => x.value!);
 
-        var result = await GetCultureStrings(sourceResxFile, translator, mainFile);
+        var result = await GetCultureStringsAsync(sourceResxFile, translator, mainFile);
 
         _excelWriter.Write(mainFile, result, parameters.Value.ExcelFile);
         OpenExcelFile(parameters);
@@ -55,7 +55,7 @@ partial class Program
         process.Start();
     }
 
-    private static async Task<string> GetRepoPath(string resxFilePath)
+    private static async Task<string> GetRepoPathAsync(string resxFilePath)
     {
         using var process = new Process();
 
@@ -73,7 +73,7 @@ partial class Program
         return path;
     }
 
-    private static async IAsyncEnumerable<(string key, string? value)> GetDiffOfResxBetweenBranches(string relativeResxFilePath, string repoPath, string remoteBranch, string resxFilePath)
+    private static async IAsyncEnumerable<(string key, string? value)> GetDiffOfResxBetweenBranchesAsync(string relativeResxFilePath, string repoPath, string remoteBranch, string resxFilePath)
     {
         var gitCommand = $"show {remoteBranch}:" + relativeResxFilePath.Replace('\\', '/').TrimStart('/');
 
@@ -99,7 +99,7 @@ partial class Program
         await process.WaitForExitAsync();
     }
 
-    private static async Task<Dictionary<CultureInfo, Dictionary<string, string>>> GetCultureStrings(string resxFilePath, ITranslator translator, Dictionary<string, string> mainFile)
+    private static async Task<Dictionary<CultureInfo, Dictionary<string, string>>> GetCultureStringsAsync(string resxFilePath, ITranslator translator, Dictionary<string, string> mainFile)
     {
         var result = new Dictionary<CultureInfo, Dictionary<string, string>>();
         var fileName = Path.GetFileNameWithoutExtension(resxFilePath);
@@ -113,7 +113,6 @@ partial class Program
         var fetched = 0;
 
         Console.WriteLine($"Fetching translations for {nrOfTexts} texts");
-
 
         foreach (var file in langFiles)
         {
