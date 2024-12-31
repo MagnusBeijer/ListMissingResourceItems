@@ -13,6 +13,12 @@ partial class Program
 
     static async Task Main(string[] args)
     {
+        if (!await IsGitInstalledAsync())
+        {
+            Console.WriteLine("Error: Git is not installed. Please install Git to continue.");
+            return;
+        }
+
         ParserResult<ApplicationParameters> parameters = Parser.Default.ParseArguments<ApplicationParameters>(args);
 
         if (parameters.Tag == ParserResultType.NotParsed)
@@ -160,5 +166,25 @@ partial class Program
             localResult.Add(item.Key, await item.Value);
         }
         fetchBuffer.Clear();
+    }
+
+    private static async Task<bool> IsGitInstalledAsync()
+    {
+        try
+        {
+            using var process = new Process();
+            process.StartInfo.FileName = "git";
+            process.StartInfo.Arguments = "--version";
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.CreateNoWindow = true;
+            process.Start();
+            await process.WaitForExitAsync();
+            return process.ExitCode == 0;
+        }
+        catch
+        {
+            return false;
+        }
     }
 }
