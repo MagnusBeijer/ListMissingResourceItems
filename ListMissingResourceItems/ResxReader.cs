@@ -1,35 +1,32 @@
-﻿using System.Xml;
+using System.Xml;
 
 namespace ListMissingResourceItems;
 
 public class ResxReader
 {
-    public async IAsyncEnumerable<(string key, string? value)> ReadResxFileAsync(string filePath)
+    public IAsyncEnumerable<(string key, string? value)> ReadResxFileAsync(string filePath)
     {
         var textReader = File.OpenText(filePath);
-        await foreach (var item in ReadResxFileAsync(textReader))
-        {
-            yield return item;
-        }
+        return ReadResxFileAsync(textReader);
     }
 
     public async IAsyncEnumerable<(string key, string? value)> ReadResxFileAsync(TextReader textReader)
     {
         using (textReader)
-        using (var reader = XmlReader.Create(textReader, new XmlReaderSettings { Async = true, }))
+        using (var xmlReader = XmlReader.Create(textReader, new XmlReaderSettings { Async = true, }))
         {
-            while (await reader.ReadAsync())
+            while (await xmlReader.ReadAsync())
             {
-                if (reader.NodeType == XmlNodeType.Element && reader.Name == "data")
+                if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "data")
                 {
-                    string? key = reader.GetAttribute("name");
+                    string? key = xmlReader.GetAttribute("name");
 
                     if (key != null)
                     {
                         string? value = null;
-                        if (reader.ReadToDescendant("value"))
+                        if (xmlReader.ReadToDescendant("value"))
                         {
-                            value = await reader.ReadElementContentAsStringAsync();
+                            value = await xmlReader.ReadElementContentAsStringAsync();
                         }
 
                         yield return (key, value);
