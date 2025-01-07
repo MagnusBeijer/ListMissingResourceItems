@@ -43,7 +43,12 @@ partial class Program
         var result = await GetCultureStringsAsync(sourceResxFile, translator, mainFile);
 
         _excelWriter.Write(mainFile, result, parameters.Value.ExcelFile);
-        OpenExcelFile(parameters);
+
+        if (parameters.Value.OpenExcel)
+        {
+            Console.WriteLine("Opening Excel file to display the result...");
+            OpenExcelFile(parameters);
+        }
     }
 
     private static void OpenExcelFile(ParserResult<ApplicationParameters> parameters)
