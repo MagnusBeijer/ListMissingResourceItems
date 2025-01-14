@@ -2,7 +2,7 @@
   "profiles": {
     "ListMissingResourceItems": {
       "commandName": "Project",
-      "commandLineArgs": "--source-resx-file C:\\R\\iXDeveloper\\Resources\\ResourcesIde\\Texts\\TextsIde.resx --remote-branch-name master --target-excel-file C:\\temp\\out.xlsx --open-excel true"
+      "commandLineArgs": "--source-resx-file C:\\MyRep\\Resources\\ResourcesIde\\Texts\\TextsIde.resx --remote-branch-name master --target-excel-file C:\\temp\\out.xlsx --open-excel true"
     }
   }
 }
