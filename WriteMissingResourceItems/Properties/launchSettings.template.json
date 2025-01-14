@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ListMissingResourceItems": {
+      "commandName": "Project",
+      "commandLineArgs": "--target-resx-file C:\\R\\iXDeveloper\\Resources\\ResourcesIde\\Texts\\TextsIde.resx --source-excel-file C:\\temp\\out.xlsx"
+    }
+  }
+}
