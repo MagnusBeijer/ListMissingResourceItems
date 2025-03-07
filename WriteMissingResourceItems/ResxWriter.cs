@@ -8,7 +8,7 @@ public class ResxWriter
     {
         XDocument doc;
         await using (var stream = File.OpenRead(filePath))
-            doc = await XDocument.LoadAsync(stream, System.Xml.Linq.LoadOptions.None, CancellationToken.None);
+            doc = await XDocument.LoadAsync(stream, LoadOptions.None, CancellationToken.None);
 
         XElement? root = doc.Element("root");
 
