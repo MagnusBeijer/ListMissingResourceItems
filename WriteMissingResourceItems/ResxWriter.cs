@@ -1,4 +1,4 @@
-﻿using System.Xml.Linq;
+using System.Xml.Linq;
 
 namespace WriteMissingResourceItems;
 
@@ -35,7 +35,7 @@ public class ResxWriter
             }
         }
 
-        await using (var stream = File.OpenWrite(filePath))
-            await doc.SaveAsync(stream, System.Xml.Linq.SaveOptions.None, CancellationToken.None);
+        await using (var stream = File.Create(filePath))
+            await doc.SaveAsync(stream, SaveOptions.None, CancellationToken.None);
     }
 }
