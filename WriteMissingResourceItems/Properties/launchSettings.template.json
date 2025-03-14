@@ -2,7 +2,7 @@
   "profiles": {
     "ListMissingResourceItems": {
       "commandName": "Project",
-      "commandLineArgs": "--target-resx-file C:\\MyRep\\Resources\\ResourcesIde\\Texts\\TextsIde.resx --source-excel-file C:\\temp\\out.xlsx"
+      "commandLineArgs": "--target-resx-file C:\\MyRep\\Resources\\ResourcesIde\\Texts\\TextsIde.resx --source-excel-file C:\\temp\\out.xlsx --trim-other-files true"
     }
   }
 }

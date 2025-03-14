@@ -2,6 +2,7 @@ using ClosedXML.Excel;
 using CommandLine;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Xml;
 
 namespace WriteMissingResourceItems;
 
@@ -26,16 +27,44 @@ public class Program
         var langFiles = Directory.EnumerateFiles(path, searchPattern).ToList();
 
         var data = ReadExcel(parameters.Value.ExcelFile);
-        var resxWriter = new ResxWriter();
+        var keysInMainFile = parameters.Value.TrimOtherFiles ? await GetKeysInMainFile(resxFilePath) : [];
+
         foreach (var file in langFiles)
         {
+            var resxWriter = await ResxWriter.OpenAsync(file);
             var lang = Path.GetFileNameWithoutExtension(file).Split('.')[1];
             var culture = CultureInfo.GetCultureInfo(lang);
             if (data.TryGetValue(culture, out var translations))
             {
                 Console.WriteLine("Updating " + file);
-                await resxWriter.WriteResxAsync(file, translations);
+                resxWriter.UpdateValues(translations);
             }
+
+            if (parameters.Value.TrimOtherFiles)
+                resxWriter.Trim(keysInMainFile);
+
+            await resxWriter.SaveAsync(file);
+        }
+    }
+
+    private static async Task<HashSet<string>> GetKeysInMainFile(string resxFilePath)
+    {
+        using (var textReader = File.OpenText(resxFilePath))
+        using (var xmlReader = XmlReader.Create(textReader, new XmlReaderSettings { Async = true, }))
+        {
+            var keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            while (await xmlReader.ReadAsync())
+            {
+                if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "data")
+                {
+                    string? key = xmlReader.GetAttribute("name");
+                    if (key != null)
+                    {
+                        keys.Add(key);
+                    }
+                }
+            }
+            return keys;
         }
     }
 
