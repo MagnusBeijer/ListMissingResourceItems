@@ -14,6 +14,7 @@ Imports the Excel file created by ListMissingResourceItems back to the resx file
 
 `source-excel-file` path to the Excel file to use as source.  
 `target-resx-file` path to the main resx file to save the result to.  
+`trim-other-files` is optional and indicates whether to remove entries from releated resx files if they do not exist in the main resx file. (default is `false`)  
 
 Example:  
 `WriteMissingResourceItems.exe --target-resx-file C:\R\MyRepo\Resources\TextsIde.resx --source-excel-file C:\temp\out.xlsx`
