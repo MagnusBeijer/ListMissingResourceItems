@@ -2,13 +2,13 @@ using System.Diagnostics;
 using System.Globalization;
 using CommandLine;
 using ListMissingResourceItems.Translators;
+using WriteMissingResourceItems;
 
 namespace ListMissingResourceItems;
 
 partial class Program
 {
     private const int FetchConcurrency = 10;
-    private static readonly ExcelWriter _excelWriter = new ExcelWriter();
     private static readonly ResxReader _resxReader = new ResxReader();
 
     static async Task Main(string[] args)
@@ -30,6 +30,12 @@ partial class Program
             return;
         }
 
+        if (parameters.Value.TargetExcelFile == null && parameters.Value.TargetResxFile == null)
+        {
+            Console.WriteLine("Error: Either Target-Excel-File or Target-Resx-File must be specified.");
+            return;
+        }
+
         var sourceResxFile = parameters.Value.SourceResxFile;
         var repoPath = await GetRepoPathAsync(sourceResxFile);
         var remoteBranch = parameters.Value.RemoteBranch;
@@ -42,19 +48,29 @@ partial class Program
 
         var result = await GetCultureStringsAsync(sourceResxFile, translator, mainFile);
 
-        _excelWriter.Write(mainFile, result, parameters.Value.ExcelFile);
-
-        if (parameters.Value.OpenExcel)
+        if (parameters.Value.TargetExcelFile != null)
         {
-            Console.WriteLine("Opening Excel file to display the result...");
-            OpenExcelFile(parameters);
+            var excelWriter = new ExcelWriter();
+            excelWriter.Write(mainFile, result, parameters.Value.TargetExcelFile);
+
+            if (parameters.Value.OpenExcel)
+            {
+                Console.WriteLine("Opening Excel file to display the result...");
+                OpenExcelFile(parameters);
+            }
+        }
+
+        if (parameters.Value.TargetResxFile != null)
+        {
+            var resxWriter = new ResxWriter();
+            await resxWriter.WriteResxAsync(parameters.Value.TargetResxFile, result);
         }
     }
 
     private static void OpenExcelFile(ParserResult<ApplicationParameters> parameters)
     {
         using var process = new Process();
-        process.StartInfo.FileName = parameters.Value.ExcelFile;
+        process.StartInfo.FileName = parameters.Value.TargetExcelFile;
         process.StartInfo.UseShellExecute = true;
 
         process.Start();

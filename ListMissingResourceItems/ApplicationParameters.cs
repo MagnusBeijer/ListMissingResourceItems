@@ -4,8 +4,11 @@ namespace ListMissingResourceItems;
 
 public class ApplicationParameters
 {
-    [Option("target-excel-file", Required = true)]
-    public required string ExcelFile { get; set; }
+    [Option("target-excel-file", Required = false)]
+    public string? TargetExcelFile { get; set; }
+
+    [Option("target-resx-file", Required = false)]
+    public string? TargetResxFile { get; set; }
 
     [Option("source-resx-file", Required = true)]
     public required string SourceResxFile { get; set; }

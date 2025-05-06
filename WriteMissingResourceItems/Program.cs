@@ -20,23 +20,9 @@ public class Program
         }
 
         string resxFilePath = parameters.Value.ResxFile;
-        var path = Path.GetDirectoryName(resxFilePath)!;
-        var fileName = Path.GetFileNameWithoutExtension(resxFilePath);
-        var searchPattern = fileName + ".*.resx";
-        var langFiles = Directory.EnumerateFiles(path, searchPattern).ToList();
-
         var data = ReadExcel(parameters.Value.ExcelFile);
         var resxWriter = new ResxWriter();
-        foreach (var file in langFiles)
-        {
-            var lang = Path.GetFileNameWithoutExtension(file).Split('.')[1];
-            var culture = CultureInfo.GetCultureInfo(lang);
-            if (data.TryGetValue(culture, out var translations))
-            {
-                Console.WriteLine("Updating " + file);
-                await resxWriter.WriteResxAsync(file, translations);
-            }
-        }
+        await resxWriter.WriteResxAsync(resxFilePath, data);
     }
 
     private static Dictionary<CultureInfo, Dictionary<string, string>> ReadExcel(string filePath)
