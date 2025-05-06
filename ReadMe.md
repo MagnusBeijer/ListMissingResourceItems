@@ -3,7 +3,7 @@ Compares the keys/values in a resx file with the same resx file in a remote bran
 
 `source-resx-file` path to the the main resx file to use as source.  
 `remote-branch-name` name of the remote branch to compare the resx file with.  
-`target-excel-file` path to the Excel file to save the result to. (optional)
+`target-excel-file` path to the Excel file to save the result to. (optional)  
 `target-resx-file` path to the main resx file to save the result to. (optional)  
 `translator` indicates which translator to use for translations. Can be either "GoogleTranslateLite" (default and free) or GoogleMlTranslator (requires an api key put in a "GoogleAuthKey.txt") (optional)  
 `open-excel` indicates whether to open the Excel file after it is created, default is false. (optional)
