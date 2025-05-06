@@ -1,10 +1,30 @@
+using System.Globalization;
 using System.Xml.Linq;
 
 namespace WriteMissingResourceItems;
 
 public class ResxWriter
 {
-    public async Task WriteResxAsync(string filePath, Dictionary<string, string> values)
+    public async Task WriteResxAsync(string mainRexFile, Dictionary<CultureInfo, Dictionary<string, string>> data)
+    {
+        var path = Path.GetDirectoryName(mainRexFile)!;
+        var fileName = Path.GetFileNameWithoutExtension(mainRexFile);
+        var searchPattern = fileName + ".*.resx";
+        var langFiles = Directory.EnumerateFiles(path, searchPattern).ToList();
+
+        foreach (var file in langFiles)
+        {
+            var lang = Path.GetFileNameWithoutExtension(file).Split('.')[1];
+            var culture = CultureInfo.GetCultureInfo(lang);
+            if (data.TryGetValue(culture, out var translations))
+            {
+                Console.WriteLine("Updating " + file);
+                await WriteResxAsync(file, translations);
+            }
+        }
+    }
+
+    private static async Task WriteResxAsync(string filePath, Dictionary<string, string> values)
     {
         XDocument doc;
         await using (var stream = File.OpenRead(filePath))
