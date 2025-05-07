@@ -16,7 +16,7 @@ public class ApplicationParameters
     [Option("remote-branch-name", Required = true)]
     public required string RemoteBranch { get; set; }
 
-    [Option("translator", Required = false, HelpText = "Can be either GoogleMlTranslator or GoogleTranslateLite (default)")]
+    [Option("translator", Required = false)]
     public string Translator { get; set; } = "GoogleTranslateLite";
 
     [Option("open-excel", Required = false, HelpText = "Indicates if Excel should be opened to display the result after the file has been created")]

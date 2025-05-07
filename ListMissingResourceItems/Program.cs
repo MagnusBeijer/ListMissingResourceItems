@@ -175,7 +175,10 @@ partial class Program
         return translator switch
         {
             "GoogleMlTranslator" => new GoogleMlTranslator(GetGoogleAuthKey()),
-            _ or "GoogleTranslateLite" => new GoogleTranslateLite(),
+            "Libre" => new LibreTranslator(),
+            "MyMemory" => new MyMemoryTranslator(),
+            "GoogleTranslateLite" => new GoogleTranslateLite(),
+            _ => throw new ArgumentException($"Unknown translator: {translator}. Available translators: GoogleMlTranslator, Libre, MyMemory, GoogleTranslateLite")
         };
     }
 
