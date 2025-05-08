@@ -12,7 +12,7 @@ Compares the keys/values in a resx file with the same resx file in a remote bran
 `open-excel` indicates whether to open the Excel file after it is created, default is false. (optional)
 
 Example:  
-`ListMissingResourceItems.exe --source-resx-file C:\R\MyRepo\Resources\TextsIde.resx --remote-branch-name master --target-excel-file C:\temp\out.xlsx`
+`ListMissingResourceItems.exe --translator GoogleMlTranslator --source-resx-file C:\MyRepo\Texts.resx --remote-branch-name origin/master --target-resx-file C:\MyRepo\Texts.resx`
 
 # WriteMissingResourceItems
 Imports the Excel file created by ListMissingResourceItems back to the resx files.  
