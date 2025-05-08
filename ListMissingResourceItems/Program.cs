@@ -170,7 +170,15 @@ partial class Program
 
     public static ITranslator TranslatorFactory(string translator)
     {
-        static string GetGoogleAuthKey() => File.ReadAllText("GoogleAuthKey.txt");
+        static string GetGoogleAuthKey()
+        {
+            if (!File.Exists("GoogleAuthKey.txt"))
+            {
+                Console.WriteLine("GoogleAuthKey.txt file not found. Please create it with your Google API key. The file should be placed in the same directory as the application exe file.");
+                throw new FileNotFoundException("GoogleAuthKey.txt file not found.");
+            }
+            return File.ReadAllText("GoogleAuthKey.txt");
+        }
 
         return translator switch
         {
