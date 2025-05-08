@@ -2,7 +2,7 @@
   "profiles": {
     "ListMissingResourceItems": {
       "commandName": "Project",
-      "commandLineArgs": "--source-resx-file C:\\R\\iXDeveloper\\Resources\\ResourcesIde\\Texts\\TextsIde.resx --remote-branch-name origin/master --target-resx-file C:\\R\\iXDeveloper\\Resources\\ResourcesIde\\Texts\\TextsIde.resx"
+      "commandLineArgs": "--translator GoogleMlTranslator --source-resx-file C:\\R\\iXDeveloper\\Resources\\ResourcesIde\\Texts\\TextsIde.resx --remote-branch-name origin/master --target-resx-file C:\\R\\iXDeveloper\\Resources\\ResourcesIde\\Texts\\TextsIde.resx"
     }
   }
 }
