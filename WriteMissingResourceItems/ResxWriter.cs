@@ -37,7 +37,7 @@ public class ResxWriter
                     .ToHashSet(StringComparer.OrdinalIgnoreCase);
     }
 
-    private static async Task WriteResxAsync(string filePath, Dictionary<string, string> values, HashSet<string> mainKeys)
+    private static async Task WriteResxAsync(string filePath, Dictionary<string, string> translations, HashSet<string> mainKeys)
     {
         XDocument doc;
         await using (var stream = File.OpenRead(filePath))
@@ -48,19 +48,24 @@ public class ResxWriter
         if (root == null)
             return;
 
-        var existingElements = root
-                                .Elements("data").Select(e => (Name: e.Attribute("name")?.Value, Value: e.Element("value")))
-                                .Where(x => x.Name != null && x.Value != null)
-                                .ToDictionary(x => x.Name!, x => x.Value!, StringComparer.OrdinalIgnoreCase);
+        var existingElements = GetExistingElements(root);
 
-        AddOrUpdate(values, root, existingElements);
-        Remove(mainKeys, existingElements);
+        AddOrUpdate(existingElements, translations, root);
+        Remove(existingElements, mainKeys);
 
         await using (var stream = File.Create(filePath))
             await doc.SaveAsync(stream, SaveOptions.None, CancellationToken.None);
     }
 
-    private static void Remove(HashSet<string> mainKeys, Dictionary<string, XElement> existingElements)
+    private static Dictionary<string, XElement> GetExistingElements(XElement root)
+    {
+        return root
+                .Elements("data").Select(e => (Name: e.Attribute("name")?.Value, Value: e.Element("value")))
+                .Where(x => x.Name != null && x.Value != null)
+                .ToDictionary(x => x.Name!, x => x.Value!, StringComparer.OrdinalIgnoreCase);
+    }
+
+    private static void Remove(Dictionary<string, XElement> existingElements, HashSet<string> mainKeys)
     {
         foreach (var item in existingElements.Where(x => !mainKeys.Contains(x.Key)))
         {
@@ -68,20 +73,20 @@ public class ResxWriter
         }
     }
 
-    private static void AddOrUpdate(Dictionary<string, string> values, XElement root, Dictionary<string, XElement> existingElements)
+    private static void AddOrUpdate(Dictionary<string, XElement> existingElements, Dictionary<string, string> translations, XElement root)
     {
-        foreach (var entry in values)
+        foreach (var translation in translations)
         {
-            if (existingElements.TryGetValue(entry.Key, out var valueElement))
+            if (existingElements.TryGetValue(translation.Key, out var valueElement))
             {
-                valueElement.Value = entry.Value;
+                valueElement.Value = translation.Value;
             }
             else
             {
                 root.Add(new XElement("data",
-                                      new XAttribute("name", entry.Key),
+                                      new XAttribute("name", translation.Key),
                                       new XAttribute(XNamespace.Xml + "space", "preserve"),
-                                      new XElement("value", entry.Value)));
+                                      new XElement("value", translation.Value)));
             }
         }
     }
