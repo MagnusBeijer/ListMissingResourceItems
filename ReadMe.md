@@ -1,5 +1,5 @@
 # ListMissingResourceItems
-Compares the keys/values in a resx file with the same resx file in a remote branch and **translates** all new/changed values and saves the result to an Excel file resx file(s).
+Compares the keys/values in a resx file with the same resx file in a remote branch and **translates** all new/changed values and saves the result to an Excel file or resx file(s).
 
 `source-resx-file` path to the the main resx file to use as source.  
 `remote-branch-name` name of the remote branch to compare the resx file with.  
