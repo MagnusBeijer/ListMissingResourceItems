@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Globalization;
+using System.Text;
 using CommandLine;
 using ListMissingResourceItems.Translators;
 using WriteMissingResourceItems;
@@ -86,6 +87,7 @@ partial class Program
         process.StartInfo.RedirectStandardOutput = true;
         process.StartInfo.UseShellExecute = false;
         process.StartInfo.CreateNoWindow = true;
+        process.StartInfo.StandardOutputEncoding = Encoding.UTF8;
 
         process.Start();
         var path = (await process.StandardOutput.ReadToEndAsync()).Trim().Replace('/', '\\');
@@ -106,6 +108,7 @@ partial class Program
         process.StartInfo.RedirectStandardOutput = true;
         process.StartInfo.UseShellExecute = false;
         process.StartInfo.CreateNoWindow = true;
+        process.StartInfo.StandardOutputEncoding = Encoding.UTF8;
 
         process.Start();
 
