@@ -1,10 +1,10 @@
 # ListMissingResourceItems
-Compares the keys/values in a resx file with the same resx file in a remote branch and **translates** all new/changed values and saves the result to an Excel file or a resx file.
+Compares the keys/values in a resx file with the same resx file in a remote branch and **translates** all new/changed values and saves the result to an Excel file resx file(s).
 
 `source-resx-file` path to the the main resx file to use as source.  
 `remote-branch-name` name of the remote branch to compare the resx file with.  
 `target-excel-file` path to the Excel file to save the result to. (optional)  
-`target-resx-file` path to the main resx file to save the result to. (optional)  
+`target-resx-file` path to the main resx file to save the result to. (Translations will end up in correct related file) (optional)  
 `translator` indicates which translator to use. (optional)  
 * `GoogleTranslateLite` (default and free)
 * `GoogleMlTranslator` (requires an api key put in a "GoogleAuthKey.txt")  
