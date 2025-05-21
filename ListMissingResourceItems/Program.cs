@@ -38,12 +38,12 @@ partial class Program
         }
 
         var sourceResxFile = parameters.Value.SourceResxFile;
-        var repoPath = await GetRepoPathAsync(sourceResxFile);
-        var remoteBranch = parameters.Value.RemoteBranch;
         var translator = TranslatorFactory(parameters.Value.Translator);
-        var relativeResxFilePath = sourceResxFile[(repoPath.Length + 1)..];
+        var remoteBranch = parameters.Value.RemoteBranch;
 
-        var mainFile = await GetDiffOfResxBetweenBranchesAsync(relativeResxFilePath, repoPath, remoteBranch, sourceResxFile)
+        var mainFile = await (remoteBranch == null
+                                    ? _resxReader.ReadResxFileAsync(sourceResxFile)
+                                    : GetDiffOfResxBetweenBranchesAsync(remoteBranch, sourceResxFile))
                                 .Where(x => !string.IsNullOrWhiteSpace(x.value))
                                 .ToDictionaryAsync(x => x.key, x => x.value!);
 
@@ -96,8 +96,10 @@ partial class Program
         return path;
     }
 
-    private static async IAsyncEnumerable<(string key, string? value)> GetDiffOfResxBetweenBranchesAsync(string relativeResxFilePath, string repoPath, string remoteBranch, string resxFilePath)
+    private static async IAsyncEnumerable<(string key, string? value)> GetDiffOfResxBetweenBranchesAsync(string remoteBranch, string resxFilePath)
     {
+        var repoPath = await GetRepoPathAsync(resxFilePath);
+        var relativeResxFilePath = resxFilePath[(repoPath.Length + 1)..];
         var gitCommand = $"show {remoteBranch}:" + relativeResxFilePath.Replace('\\', '/').TrimStart('/');
 
         using var process = new Process();

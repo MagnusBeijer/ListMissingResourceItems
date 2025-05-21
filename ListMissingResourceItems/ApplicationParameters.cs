@@ -13,8 +13,8 @@ public class ApplicationParameters
     [Option("source-resx-file", Required = true, HelpText = "Path to the the main resx file to use as source")]
     public required string SourceResxFile { get; set; }
 
-    [Option("remote-branch-name", Required = true, HelpText = "Name of the remote branch to compare the resx file with")]
-    public required string RemoteBranch { get; set; }
+    [Option("remote-branch-name", Required = false, HelpText = "Name of the remote branch to compare the resx file with")]
+    public string? RemoteBranch { get; set; }
 
     [Option("translator", Default = "GoogleTranslateLite", Required = false, HelpText = "Can be either GoogleMlTranslator or GoogleTranslateLite")]
     public string Translator { get; set; } = "GoogleTranslateLite";
