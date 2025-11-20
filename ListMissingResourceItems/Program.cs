@@ -175,12 +175,15 @@ partial class Program
     {
         static string GetGoogleAuthKey()
         {
-            if (!File.Exists("GoogleAuthKey.txt"))
+            var appDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            var googleKeyfilePath = Path.Combine(appDirectory, "GoogleAuthKey.txt");
+
+            if (!File.Exists(googleKeyfilePath))
             {
-                Console.WriteLine("GoogleAuthKey.txt file not found. Please create it with your Google API key. The file should be placed in the same directory as the application exe file.");
-                throw new FileNotFoundException("GoogleAuthKey.txt file not found.");
+                Console.WriteLine(googleKeyfilePath + " file not found. Please create it with your Google API key. The file should be placed in the same directory as the application exe file.");
+                throw new FileNotFoundException(googleKeyfilePath + " file not found.");
             }
-            return File.ReadAllText("GoogleAuthKey.txt");
+            return File.ReadAllText(googleKeyfilePath);
         }
 
         return translator switch
