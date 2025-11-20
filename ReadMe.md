@@ -7,7 +7,7 @@ Compares the keys/values in a resx file with the same resx file in a remote bran
 `target-resx-file` path to the main resx file to save the result to. (Translations will end up in correct related file) (optional)  
 `translator` indicates which translator to use. (optional)  
 * `GoogleTranslateLite` (default and free)
-* `GoogleMlTranslator` (requires an api key put in a "GoogleAuthKey.txt")  
+* `GoogleMlTranslator` (requires an api key put in a "GoogleAuthKey.txt" in application dir)  
 
 `open-excel` indicates whether to open the Excel file after it is created, default is false. (optional)
 
