@@ -37,6 +37,10 @@ partial class Program
             return;
         }
 
+        parameters.Value.SourceResxFile = ToAbsolutePath(parameters.Value.SourceResxFile)!;
+        parameters.Value.TargetExcelFile = ToAbsolutePath(parameters.Value.TargetExcelFile);
+        parameters.Value.TargetResxFile = ToAbsolutePath(parameters.Value.TargetResxFile);
+
         var sourceResxFile = parameters.Value.SourceResxFile;
         var repoPath = await GetRepoPathAsync(sourceResxFile);
         var remoteBranch = parameters.Value.RemoteBranch;
@@ -71,6 +75,14 @@ partial class Program
             var resxWriter = new ResxWriter();
             await resxWriter.WriteResxAsync(parameters.Value.TargetResxFile, result);
         }
+    }
+
+    private static string? ToAbsolutePath(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return path;
+
+        return Path.GetFullPath(path, Directory.GetCurrentDirectory());
     }
 
     private static void OpenExcelFile(ParserResult<ApplicationParameters> parameters)
