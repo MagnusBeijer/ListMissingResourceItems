@@ -49,6 +49,11 @@ partial class Program
 
         var result = await GetCultureStringsAsync(sourceResxFile, translator, mainFile);
 
+        if (parameters.Value.TargetExcelFile == null && parameters.Value.TargetResxFile == null && parameters.Value.SourceResxFile != null)
+        {
+            parameters.Value.TargetResxFile = parameters.Value.SourceResxFile;
+        }
+
         if (parameters.Value.TargetExcelFile != null)
         {
             var excelWriter = new ExcelWriter();
