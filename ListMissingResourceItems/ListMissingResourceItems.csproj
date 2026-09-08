@@ -6,7 +6,8 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Copyright>Copyright $([System.DateTime]::Now.Year) Magnus Persson. Licensed under the MIT License.</Copyright>
+    <Copyright>Copyright $([System.DateTime]::Now.Year) Magnus Persson.</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
