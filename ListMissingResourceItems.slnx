@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="ReadMe.md" />
+  </Folder>
+  <Project Path="ListMissingResourceItems/ListMissingResourceItems.csproj" />
+  <Project Path="WriteMissingResourceItems/WriteMissingResourceItems.csproj" />
+</Solution>
