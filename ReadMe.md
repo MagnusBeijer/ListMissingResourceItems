@@ -6,19 +6,25 @@ Compares the keys/values in a resx file with the same resx file in a remote bran
 
 ## Options
 
-| Option | Required | Description |
-| --- | --- | --- |
-| <nobr>`--source-resx-file`</nobr> | Yes | Path to the main resx file to use as source. |
-| <nobr>`--remote-branch-name`</nobr> | No | Name of the remote branch to compare the resx file with. If omitted, all items are translated. |
-| <nobr>`--target-excel-file`</nobr> | No | Path to the Excel file to save the result to. |
-| <nobr>`--target-resx-file`</nobr> | No | Path to the main resx file to save the result to. Translations end up in the correct related language file. If no target is specified (neither Excel nor resx), `--source-resx-file` is used as target. |
-| <nobr>`--translator`</nobr> | No | Which translator to use, see [Translators](#translators). Default: `GoogleTranslateLite`. |
-| <nobr>`--open-excel`</nobr> | No | Open the Excel file after it is created. Default: `false`. |
+**`--source-resx-file`** *(required)*  
+Path to the main resx file to use as source.
 
-### Translators
+**`--remote-branch-name`**  
+Name of the remote branch to compare the resx file with. If omitted, all items are translated.
 
+**`--target-excel-file`**  
+Path to the Excel file to save the result to.
+
+**`--target-resx-file`**  
+Path to the main resx file to save the result to. Translations end up in the correct related language file. If no target is specified (neither Excel nor resx), `--source-resx-file` is used as target.
+
+**`--translator`**  
+Which translator to use. Default: `GoogleTranslateLite`.
 - **`GoogleTranslateLite`** - default and free.
 - **`GoogleMlTranslator`** - requires an API key placed in a `GoogleAuthKey.txt` file in the application directory.
+
+**`--open-excel`**  
+Open the Excel file after it is created. Default: `false`.
 
 ## Examples
 
@@ -46,10 +52,11 @@ Imports the Excel file created by ListMissingResourceItems back into the resx fi
 
 ## Options
 
-| Option | Required | Description |
-| --- | --- | --- |
-| <nobr>`--source-excel-file`</nobr> | Yes | Path to the Excel file to use as source. |
-| <nobr>`--target-resx-file`</nobr> | Yes | Path to the main resx file to save the result to. |
+**`--source-excel-file`** *(required)*  
+Path to the Excel file to use as source.
+
+**`--target-resx-file`** *(required)*  
+Path to the main resx file to save the result to.
 
 ## Example
 
