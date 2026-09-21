@@ -1,31 +1,58 @@
 # ListMissingResourceItems
-Compares the keys/values in a resx file with the same resx file in a remote branch and **translates** all new/changed values and saves the result to an Excel file or resx file(s).  
-If no remote branch is specified, all values in the source resx file are translated.
 
-`source-resx-file` path to the the main resx file to use as source.  
-`remote-branch-name` name of the remote branch to compare the resx file with. If omitted, all items are translated. (optional)  
-`target-excel-file` path to the Excel file to save the result to. (optional)  
-`target-resx-file` path to the main resx file to save the result to. If no target is specified (excel nor resx), source-resx-file will be used as target.  (Translations will end up in correct related file) (optional)  
-`translator` indicates which translator to use. (optional)  
-* `GoogleTranslateLite` (default and free)
-* `GoogleMlTranslator` (requires an api key put in a "GoogleAuthKey.txt" in application dir)  
+Compares the keys/values in a resx file with the same resx file in a remote branch and **translates** all new/changed values, then saves the result to an Excel file or resx file(s).
 
-`open-excel` indicates whether to open the Excel file after it is created, default is false. (optional)
+> If no remote branch is specified, **all** values in the source resx file are translated.
 
-Example (Translate diff between current branch and master, save result to source resx file):  
-`ListMissingResourceItems.exe --translator GoogleMlTranslator --source-resx-file C:\MyRepo\Texts.resx --remote-branch-name master`
+## Options
 
-Example (translate all items):  
-`ListMissingResourceItems.exe --source-resx-file C:\MyRepo\Texts.resx`
+| Option | Required | Description |
+| --- | --- | --- |
+| `--source-resx-file` | Yes | Path to the main resx file to use as source. |
+| `--remote-branch-name` | No | Name of the remote branch to compare the resx file with. If omitted, all items are translated. |
+| `--target-excel-file` | No | Path to the Excel file to save the result to. |
+| `--target-resx-file` | No | Path to the main resx file to save the result to. Translations end up in the correct related language file. If no target is specified (neither Excel nor resx), `--source-resx-file` is used as target. |
+| `--translator` | No | Which translator to use, see [Translators](#translators). Default: `GoogleTranslateLite`. |
+| `--open-excel` | No | Open the Excel file after it is created. Default: `false`. |
 
-Example (Translate diff between current branch and master, save result to an Excel file and open it):  
-`ListMissingResourceItems.exe --source-resx-file C:\MyRepo\Texts.resx --remote-branch-name master --target-excel-file C:\temp\out.xlsx --open-excel true`
+### Translators
+
+- **`GoogleTranslateLite`** - default and free.
+- **`GoogleMlTranslator`** - requires an API key placed in a `GoogleAuthKey.txt` file in the application directory.
+
+## Examples
+
+Translate the diff between the current branch and `master`, saving the result to the source resx file:
+
+```powershell
+ListMissingResourceItems.exe --translator GoogleMlTranslator --source-resx-file C:\MyRepo\Texts.resx --remote-branch-name master
+```
+
+Translate all items:
+
+```powershell
+ListMissingResourceItems.exe --source-resx-file C:\MyRepo\Texts.resx
+```
+
+Translate the diff between the current branch and `master`, saving the result to an Excel file and opening it:
+
+```powershell
+ListMissingResourceItems.exe --source-resx-file C:\MyRepo\Texts.resx --remote-branch-name master --target-excel-file C:\temp\out.xlsx --open-excel true
+```
 
 # WriteMissingResourceItems
-Imports the Excel file created by ListMissingResourceItems back to the resx files.  
 
-`source-excel-file` path to the Excel file to use as source.  
-`target-resx-file` path to the main resx file to save the result to.  
+Imports the Excel file created by ListMissingResourceItems back into the resx files.
 
-Example:  
-`WriteMissingResourceItems.exe --target-resx-file C:\R\MyRepo\Resources\TextsIde.resx --source-excel-file C:\temp\out.xlsx`
+## Options
+
+| Option | Required | Description |
+| --- | --- | --- |
+| `--source-excel-file` | Yes | Path to the Excel file to use as source. |
+| `--target-resx-file` | Yes | Path to the main resx file to save the result to. |
+
+## Example
+
+```powershell
+WriteMissingResourceItems.exe --target-resx-file C:\R\MyRepo\Resources\TextsIde.resx --source-excel-file C:\temp\out.xlsx
+```
