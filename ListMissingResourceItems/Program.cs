@@ -25,12 +25,6 @@ partial class Program
             return;
         }
 
-        if (parameters.Value.TargetExcelFile == null && parameters.Value.TargetResxFile == null)
-        {
-            Console.WriteLine("Error: Either Target-Excel-File or Target-Resx-File must be specified.");
-            return;
-        }
-
         parameters.Value.SourceResxFile = ToAbsolutePath(parameters.Value.SourceResxFile)!;
         parameters.Value.TargetExcelFile = ToAbsolutePath(parameters.Value.TargetExcelFile);
         parameters.Value.TargetResxFile = ToAbsolutePath(parameters.Value.TargetResxFile);
@@ -65,7 +59,7 @@ partial class Program
 
         var result = await GetCultureStringsAsync(sourceResxFile, translator, mainFile);
 
-        if (parameters.Value.TargetExcelFile == null && parameters.Value.TargetResxFile == null && parameters.Value.SourceResxFile != null)
+        if (parameters.Value.TargetExcelFile == null && parameters.Value.TargetResxFile == null)
         {
             parameters.Value.TargetResxFile = parameters.Value.SourceResxFile;
         }
