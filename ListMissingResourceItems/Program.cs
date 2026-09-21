@@ -14,12 +14,6 @@ partial class Program
 
     static async Task Main(string[] args)
     {
-        if (!await IsGitInstalledAsync())
-        {
-            Console.WriteLine("Error: Git is not installed. Please install Git to continue.");
-            return;
-        }
-
         ParserResult<ApplicationParameters> parameters = Parser.Default.ParseArguments<ApplicationParameters>(args);
 
         if (parameters.Tag == ParserResultType.NotParsed)
@@ -42,12 +36,30 @@ partial class Program
         parameters.Value.TargetResxFile = ToAbsolutePath(parameters.Value.TargetResxFile);
 
         var sourceResxFile = parameters.Value.SourceResxFile;
-        var repoPath = await GetRepoPathAsync(sourceResxFile);
         var remoteBranch = parameters.Value.RemoteBranch;
         var translator = TranslatorFactory(parameters.Value.Translator);
-        var relativeResxFilePath = sourceResxFile[(repoPath.Length + 1)..];
 
-        var mainFile = await GetDiffOfResxBetweenBranchesAsync(relativeResxFilePath, repoPath, remoteBranch, sourceResxFile)
+        IAsyncEnumerable<(string key, string? value)> sourceItems;
+
+        if (string.IsNullOrWhiteSpace(remoteBranch))
+        {
+            sourceItems = _resxReader.ReadResxFileAsync(sourceResxFile);
+        }
+        else
+        {
+            if (!await IsGitInstalledAsync())
+            {
+                Console.WriteLine("Error: Git is not installed. Please install Git to continue.");
+                return;
+            }
+
+            var repoPath = await GetRepoPathAsync(sourceResxFile);
+            var relativeResxFilePath = sourceResxFile[(repoPath.Length + 1)..];
+
+            sourceItems = GetDiffOfResxBetweenBranchesAsync(relativeResxFilePath, repoPath, remoteBranch, sourceResxFile);
+        }
+
+        var mainFile = await sourceItems
                                 .Where(x => !string.IsNullOrWhiteSpace(x.value))
                                 .ToDictionaryAsync(x => x.key, x => x.value!);
 

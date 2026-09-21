@@ -1,8 +1,9 @@
 # ListMissingResourceItems
-Compares the keys/values in a resx file with the same resx file in a remote branch and **translates** all new/changed values and saves the result to an Excel file or resx file(s).
+Compares the keys/values in a resx file with the same resx file in a remote branch and **translates** all new/changed values and saves the result to an Excel file or resx file(s).  
+If no remote branch is specified, all values in the source resx file are translated.
 
 `source-resx-file` path to the the main resx file to use as source.  
-`remote-branch-name` name of the remote branch to compare the resx file with.  
+`remote-branch-name` name of the remote branch to compare the resx file with. If omitted, all items are translated. (optional)  
 `target-excel-file` path to the Excel file to save the result to. (optional)  
 `target-resx-file` path to the main resx file to save the result to. (Translations will end up in correct related file) (optional)  
 `translator` indicates which translator to use. (optional)  
@@ -13,6 +14,9 @@ Compares the keys/values in a resx file with the same resx file in a remote bran
 
 Example:  
 `ListMissingResourceItems.exe --translator GoogleMlTranslator --source-resx-file C:\MyRepo\Texts.resx --remote-branch-name master --target-resx-file C:\MyRepo\Texts.resx`
+
+Example (translate all items):  
+`ListMissingResourceItems.exe --source-resx-file C:\MyRepo\Texts.resx --target-resx-file C:\MyRepo\Texts.resx`
 
 # WriteMissingResourceItems
 Imports the Excel file created by ListMissingResourceItems back to the resx files.  
