@@ -20,8 +20,11 @@ internal class GoogleMlTranslator : ITranslator
 
     public async Task<string> TranslateAsync(CultureInfo from, CultureInfo to, string textToTranslate, CancellationToken cancellationToken)
     {
-        //parameter "from" is ignored since English is default
-        return (await ErrorHandlingDecorator.ExecuteWithHandling(() => _client.TranslateTextAsync(textToTranslate, GoogleLangCode(to)))).TranslatedText;
+        return (await _client.TranslateTextAsync(
+            sourceLanguage: GoogleLangCode(from),
+            targetLanguage: GoogleLangCode(to),
+            text: textToTranslate,
+            cancellationToken: cancellationToken)).TranslatedText;
     }
 
     private static string GoogleLangCode(CultureInfo cultureInfo)
