@@ -9,6 +9,9 @@ Compares the keys/values in a resx file with the same resx file in a remote bran
 **`--source-resx-file`** *(required)*  
 Path to the main resx file to use as source.
 
+**`--source-language`**  
+Language of the main resx file as an ISO 639-1 language code, optionally combined with an ISO 3166 region code (e.g. `en`, `sv`, `de`, `en-US`). Default: `en`.
+
 **`--remote-branch-name`**  
 Name of the remote branch to compare the resx file with. If omitted, all items are translated.
 
@@ -38,6 +41,12 @@ Translate all items:
 
 ```powershell
 ListMissingResourceItems.exe --source-resx-file C:\MyRepo\Texts.resx
+```
+
+Translate all items when the main resx file is in Swedish:
+
+```powershell
+ListMissingResourceItems.exe --source-resx-file C:\MyRepo\Texts.resx --source-language sv
 ```
 
 Translate the diff between the current branch and `master`, saving the result to an Excel file and opening it:

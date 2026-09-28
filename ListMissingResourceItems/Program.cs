@@ -32,6 +32,7 @@ partial class Program
         var sourceResxFile = parameters.Value.SourceResxFile;
         var remoteBranch = parameters.Value.RemoteBranch;
         var translator = TranslatorFactory(parameters.Value.Translator);
+        var sourceCulture = CultureInfo.GetCultureInfo(string.IsNullOrWhiteSpace(parameters.Value.SourceLanguage) ? "en" : parameters.Value.SourceLanguage);
 
         IAsyncEnumerable<(string key, string? value)> sourceItems;
 
@@ -57,7 +58,7 @@ partial class Program
                                 .Where(x => !string.IsNullOrWhiteSpace(x.value))
                                 .ToDictionaryAsync(x => x.key, x => x.value!);
 
-        var result = await GetCultureStringsAsync(sourceResxFile, translator, mainFile);
+        var result = await GetCultureStringsAsync(sourceResxFile, translator, mainFile, sourceCulture);
 
         if (parameters.Value.TargetExcelFile == null && parameters.Value.TargetResxFile == null)
         {
@@ -67,7 +68,7 @@ partial class Program
         if (parameters.Value.TargetExcelFile != null)
         {
             var excelWriter = new ExcelWriter();
-            excelWriter.Write(mainFile, result, parameters.Value.TargetExcelFile);
+            excelWriter.Write(mainFile, result, parameters.Value.TargetExcelFile, sourceCulture);
 
             if (parameters.Value.OpenExcel)
             {
@@ -146,14 +147,13 @@ partial class Program
         await process.WaitForExitAsync();
     }
 
-    private static async Task<Dictionary<CultureInfo, Dictionary<string, string>>> GetCultureStringsAsync(string resxFilePath, ITranslator translator, Dictionary<string, string> mainFile)
+    private static async Task<Dictionary<CultureInfo, Dictionary<string, string>>> GetCultureStringsAsync(string resxFilePath, ITranslator translator, Dictionary<string, string> mainFile, CultureInfo from)
     {
         var result = new Dictionary<CultureInfo, Dictionary<string, string>>();
         var fileName = Path.GetFileNameWithoutExtension(resxFilePath);
         var searchPattern = fileName + ".*.resx";
         var path = Path.GetDirectoryName(resxFilePath)!;
 
-        var from = CultureInfo.GetCultureInfo("en");
         var fetchBuffer = new Dictionary<string, Task<string>>(FetchConcurrency);
         var langFiles = Directory.EnumerateFiles(path, searchPattern).ToList();
         var nrOfTexts = langFiles.Count * mainFile.Count;

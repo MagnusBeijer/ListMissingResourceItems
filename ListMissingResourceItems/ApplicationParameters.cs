@@ -13,6 +13,9 @@ public class ApplicationParameters
     [Option("source-resx-file", Required = true, HelpText = "Path to the the main resx file to use as source")]
     public required string SourceResxFile { get; set; }
 
+    [Option("source-language", Default = "en", Required = false, HelpText = "Language of the main resx file as an ISO 639-1 code, optionally with an ISO 3166 region (e.g. en, sv, en-US). Defaults to 'en'")]
+    public string SourceLanguage { get; set; } = "en";
+
     [Option("remote-branch-name", Required = false, HelpText = "Name of the remote branch to compare the resx file with. If not specified, all items are translated")]
     public string? RemoteBranch { get; set; }
 

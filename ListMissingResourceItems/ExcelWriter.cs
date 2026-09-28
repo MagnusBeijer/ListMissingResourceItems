@@ -5,19 +5,17 @@ namespace ListMissingResourceItems;
 
 public class ExcelWriter
 {
-    public void Write(Dictionary<string, string> mainFile, Dictionary<CultureInfo, Dictionary<string, string>> result, string excelFilePath)
+    public void Write(Dictionary<string, string> mainFile, Dictionary<CultureInfo, Dictionary<string, string>> result, string excelFilePath, CultureInfo sourceCulture)
     {
         using var workbook = new XLWorkbook();
         var worksheet = workbook.Worksheets.Add("Sheet1");
 
-        var en = CultureInfo.GetCultureInfo("en");
-
         // Write the header
         worksheet.Cell(1, 1).Value = "Key";
         var cell = worksheet.Cell(1, 2);
-        cell.Value = en.NativeName;
+        cell.Value = sourceCulture.NativeName;
         var comment = cell.CreateComment();
-        comment.AddText(en.Name);
+        comment.AddText(sourceCulture.Name);
 
         int colIndex = 3;
         foreach (var entry in result)
