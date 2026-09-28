@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -13,14 +13,14 @@ partial class Program
         private static readonly HashSet<string> _zh = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "zh-hant", "zh-cht", "zh-hk", "zh-mo", "zh-tw" };
         private static readonly HttpClient _httpClient = new HttpClient();
 
-        public async Task<string> TranslateAsync(CultureInfo from, CultureInfo to, string value, CancellationToken cancellationToken)
+        public async Task<string> TranslateAsync(CultureInfo from, CultureInfo to, string textToTranslate, CancellationToken cancellationToken)
         {
-            List<string?> parameters = 
+            List<string?> parameters =
             [
                     "client", "dict-chrome-ex",
                     "sl", GoogleLangCode(from),
                     "tl", GoogleLangCode(to),
-                    "q", value
+                    "q", textToTranslate
             ];
 
             return await GetHttpResponseAsync(
