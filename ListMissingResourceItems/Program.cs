@@ -49,7 +49,7 @@ partial class Program
             }
 
             var repoPath = await GetRepoPathAsync(sourceResxFile);
-            var relativeResxFilePath = sourceResxFile[(repoPath.Length + 1)..];
+            var relativeResxFilePath = Path.GetRelativePath(repoPath, sourceResxFile);
 
             sourceItems = GetDiffOfResxBetweenBranchesAsync(relativeResxFilePath, repoPath, remoteBranch, sourceResxFile);
         }
@@ -114,7 +114,7 @@ partial class Program
         process.StartInfo.StandardOutputEncoding = Encoding.UTF8;
 
         process.Start();
-        var path = (await process.StandardOutput.ReadToEndAsync()).Trim().Replace('/', '\\');
+        var path = Path.GetFullPath((await process.StandardOutput.ReadToEndAsync()).Trim());
         await process.WaitForExitAsync();
 
         return path;
