@@ -4,10 +4,12 @@ namespace ListMissingResourceItems;
 
 public class ResxReader
 {
-    public IAsyncEnumerable<(string key, string? value)> ReadResxFileAsync(string filePath)
+    public async IAsyncEnumerable<(string key, string? value)> ReadResxFileAsync(string filePath)
     {
-        var textReader = File.OpenText(filePath);
-        return ReadResxFileAsync(textReader);
+        var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.Asynchronous | FileOptions.SequentialScan);
+
+        await foreach (var item in ReadResxFileAsync(new StreamReader(stream)))
+            yield return item;
     }
 
     public async IAsyncEnumerable<(string key, string? value)> ReadResxFileAsync(TextReader textReader)
